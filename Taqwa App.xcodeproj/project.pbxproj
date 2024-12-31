@@ -1,0 +1,609 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		DE1976442D230F4B004977AE /* Adhan in Frameworks */ = {isa = PBXBuildFile; productRef = DE1976432D230F4B004977AE /* Adhan */; };
+		DE223FD72D2455CA00A26E59 /* Swift..gitignore in Resources */ = {isa = PBXBuildFile; fileRef = DE223FD62D2455C000A26E59 /* Swift..gitignore */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		DE1975E82D2305F7004977AE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DE1975CD2D2305F5004977AE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DE1975D42D2305F5004977AE;
+			remoteInfo = "Taqwa App";
+		};
+		DE1975F22D2305F7004977AE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DE1975CD2D2305F5004977AE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DE1975D42D2305F5004977AE;
+			remoteInfo = "Taqwa App";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		DE1975D52D2305F5004977AE /* Taqwa App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Taqwa App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		DE1975E72D2305F7004977AE /* Taqwa AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Taqwa AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		DE1975F12D2305F7004977AE /* Taqwa AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Taqwa AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		DE223FD62D2455C000A26E59 /* Swift..gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = Swift..gitignore; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		DE1975D72D2305F5004977AE /* Taqwa App */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Taqwa App";
+			sourceTree = "<group>";
+		};
+		DE1975EA2D2305F7004977AE /* Taqwa AppTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Taqwa AppTests";
+			sourceTree = "<group>";
+		};
+		DE1975F42D2305F7004977AE /* Taqwa AppUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Taqwa AppUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		DE1975D22D2305F5004977AE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DE1976442D230F4B004977AE /* Adhan in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DE1975E42D2305F7004977AE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DE1975EE2D2305F7004977AE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		DE1975CC2D2305F5004977AE = {
+			isa = PBXGroup;
+			children = (
+				DE223FD62D2455C000A26E59 /* Swift..gitignore */,
+				DE1975D72D2305F5004977AE /* Taqwa App */,
+				DE1975EA2D2305F7004977AE /* Taqwa AppTests */,
+				DE1975F42D2305F7004977AE /* Taqwa AppUITests */,
+				DE1976422D230F47004977AE /* Frameworks */,
+				DE1975D62D2305F5004977AE /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DE1975D62D2305F5004977AE /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DE1975D52D2305F5004977AE /* Taqwa App.app */,
+				DE1975E72D2305F7004977AE /* Taqwa AppTests.xctest */,
+				DE1975F12D2305F7004977AE /* Taqwa AppUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DE1976422D230F47004977AE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		DE1975D42D2305F5004977AE /* Taqwa App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DE1975FB2D2305F7004977AE /* Build configuration list for PBXNativeTarget "Taqwa App" */;
+			buildPhases = (
+				DE1975D12D2305F5004977AE /* Sources */,
+				DE1975D22D2305F5004977AE /* Frameworks */,
+				DE1975D32D2305F5004977AE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				DE1975D72D2305F5004977AE /* Taqwa App */,
+			);
+			name = "Taqwa App";
+			packageProductDependencies = (
+				DE1976432D230F4B004977AE /* Adhan */,
+			);
+			productName = "Taqwa App";
+			productReference = DE1975D52D2305F5004977AE /* Taqwa App.app */;
+			productType = "com.apple.product-type.application";
+		};
+		DE1975E62D2305F7004977AE /* Taqwa AppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DE1975FE2D2305F7004977AE /* Build configuration list for PBXNativeTarget "Taqwa AppTests" */;
+			buildPhases = (
+				DE1975E32D2305F7004977AE /* Sources */,
+				DE1975E42D2305F7004977AE /* Frameworks */,
+				DE1975E52D2305F7004977AE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DE1975E92D2305F7004977AE /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				DE1975EA2D2305F7004977AE /* Taqwa AppTests */,
+			);
+			name = "Taqwa AppTests";
+			packageProductDependencies = (
+			);
+			productName = "Taqwa AppTests";
+			productReference = DE1975E72D2305F7004977AE /* Taqwa AppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		DE1975F02D2305F7004977AE /* Taqwa AppUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DE1976012D2305F7004977AE /* Build configuration list for PBXNativeTarget "Taqwa AppUITests" */;
+			buildPhases = (
+				DE1975ED2D2305F7004977AE /* Sources */,
+				DE1975EE2D2305F7004977AE /* Frameworks */,
+				DE1975EF2D2305F7004977AE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DE1975F32D2305F7004977AE /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				DE1975F42D2305F7004977AE /* Taqwa AppUITests */,
+			);
+			name = "Taqwa AppUITests";
+			packageProductDependencies = (
+			);
+			productName = "Taqwa AppUITests";
+			productReference = DE1975F12D2305F7004977AE /* Taqwa AppUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DE1975CD2D2305F5004977AE /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1620;
+				LastUpgradeCheck = 1620;
+				TargetAttributes = {
+					DE1975D42D2305F5004977AE = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					DE1975E62D2305F7004977AE = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = DE1975D42D2305F5004977AE;
+					};
+					DE1975F02D2305F7004977AE = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = DE1975D42D2305F5004977AE;
+					};
+				};
+			};
+			buildConfigurationList = DE1975D02D2305F5004977AE /* Build configuration list for PBXProject "Taqwa App" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = DE1975CC2D2305F5004977AE;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				DE1976412D230F40004977AE /* XCRemoteSwiftPackageReference "adhan-swift" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = DE1975D62D2305F5004977AE /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DE1975D42D2305F5004977AE /* Taqwa App */,
+				DE1975E62D2305F7004977AE /* Taqwa AppTests */,
+				DE1975F02D2305F7004977AE /* Taqwa AppUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DE1975D32D2305F5004977AE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DE223FD72D2455CA00A26E59 /* Swift..gitignore in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DE1975E52D2305F7004977AE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DE1975EF2D2305F7004977AE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DE1975D12D2305F5004977AE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DE1975E32D2305F7004977AE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DE1975ED2D2305F7004977AE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		DE1975E92D2305F7004977AE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DE1975D42D2305F5004977AE /* Taqwa App */;
+			targetProxy = DE1975E82D2305F7004977AE /* PBXContainerItemProxy */;
+		};
+		DE1975F32D2305F7004977AE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DE1975D42D2305F5004977AE /* Taqwa App */;
+			targetProxy = DE1975F22D2305F7004977AE /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		DE1975F92D2305F7004977AE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		DE1975FA2D2305F7004977AE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		DE1975FC2D2305F7004977AE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Taqwa App/Preview Content\"";
+				DEVELOPMENT_TEAM = 7HRGW55BZN;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Taqwa-App-Info.plist";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = " We need your location to calculate prayer times.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to calculate prayer times.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Liban.Ahmed.Taqwa-App";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		DE1975FD2D2305F7004977AE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Taqwa App/Preview Content\"";
+				DEVELOPMENT_TEAM = 7HRGW55BZN;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Taqwa-App-Info.plist";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = " We need your location to calculate prayer times.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to calculate prayer times.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Liban.Ahmed.Taqwa-App";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		DE1975FF2D2305F7004977AE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7HRGW55BZN;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Liban.Ahmed.Taqwa-AppTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Taqwa App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Taqwa App";
+			};
+			name = Debug;
+		};
+		DE1976002D2305F7004977AE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7HRGW55BZN;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Liban.Ahmed.Taqwa-AppTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Taqwa App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Taqwa App";
+			};
+			name = Release;
+		};
+		DE1976022D2305F7004977AE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7HRGW55BZN;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Liban.Ahmed.Taqwa-AppUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "Taqwa App";
+			};
+			name = Debug;
+		};
+		DE1976032D2305F7004977AE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7HRGW55BZN;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Liban.Ahmed.Taqwa-AppUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "Taqwa App";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		DE1975D02D2305F5004977AE /* Build configuration list for PBXProject "Taqwa App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DE1975F92D2305F7004977AE /* Debug */,
+				DE1975FA2D2305F7004977AE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DE1975FB2D2305F7004977AE /* Build configuration list for PBXNativeTarget "Taqwa App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DE1975FC2D2305F7004977AE /* Debug */,
+				DE1975FD2D2305F7004977AE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DE1975FE2D2305F7004977AE /* Build configuration list for PBXNativeTarget "Taqwa AppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DE1975FF2D2305F7004977AE /* Debug */,
+				DE1976002D2305F7004977AE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DE1976012D2305F7004977AE /* Build configuration list for PBXNativeTarget "Taqwa AppUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DE1976022D2305F7004977AE /* Debug */,
+				DE1976032D2305F7004977AE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		DE1976412D230F40004977AE /* XCRemoteSwiftPackageReference "adhan-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/batoulapps/adhan-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.4.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		DE1976432D230F4B004977AE /* Adhan */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DE1976412D230F40004977AE /* XCRemoteSwiftPackageReference "adhan-swift" */;
+			productName = Adhan;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = DE1975CD2D2305F5004977AE /* Project object */;
+}
