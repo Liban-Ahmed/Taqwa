@@ -1,14 +1,16 @@
 //
-//  SettingsView.swift
+//  TrackerView.swift
 //  Taqwa App
 //
-//  Created by Liban Ahmed on 12/30/24.
+//  Created by Liban Ahmed on 12/31/24.
 //
+
 import SwiftUI
-struct SettingsView: View {
+
+struct TrackerView: View {
     var body: some View {
         VStack {
-            Text("Settings View")
+            Text("Tracker View")
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .padding()

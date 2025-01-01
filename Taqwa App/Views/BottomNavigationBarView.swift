@@ -1,44 +1,106 @@
-//
-//  BottomNavigationBarView.swift
-//  Taqwa App
-//
-//  Created by Liban Ahmed on 12/30/24.
-//
-
 import SwiftUI
 
 struct BottomNavigationBarView: View {
+    @Binding var selectedTab: Tab
+    @Environment(\.colorScheme) private var colorScheme
+    @Namespace private var animation
+    
+    private let tabBarHeight: CGFloat = 60
+    private let impactGenerator = UIImpactFeedbackGenerator(style: .light)
+    
     var body: some View {
-        HStack {
-            Spacer()
-            navItem(icon: "sun.max", label: "Prayer", isSelected: true)
-            Spacer()
-            navItem(icon: "location.north.line", label: "Qibla")
-            Spacer()
-            navItem(icon: "chart.bar", label: "Tracker")
-            Spacer()
-            navItem(icon: "gear", label: "Settings")
-            Spacer()
+        HStack(spacing: 0) {
+            ForEach(Tab.allCases, id: \.self) { tab in
+                Spacer()
+                tabButton(tab)
+                Spacer()
+            }
         }
-        .padding()
+        .frame(height: tabBarHeight)
         .background(
-            RoundedRectangle(cornerRadius: 25)
-                .fill(Color(.systemGray6))
-                .shadow(color: .gray.opacity(0.2), radius: 4, x: 0, y: -2)
+            Glass(style: colorScheme == .dark ? .dark : .light)
         )
+        .clipShape(RoundedRectangle(cornerRadius: 25))
+        .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: -5)
+        .padding(.horizontal)
     }
-
-    private func navItem(icon: String, label: String, isSelected: Bool = false) -> some View {
-        VStack {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundColor(isSelected ? .blue : .gray)
-            Text(label)
-                .font(.footnote)
-                .foregroundColor(isSelected ? .blue : .gray)
+    
+    private func tabButton(_ tab: Tab) -> some View {
+        let isSelected = selectedTab == tab
+        
+        return Button(action: {
+            handleTabSelection(tab)
+        }) {
+            VStack(spacing: 4) {
+                Image(systemName: tab.icon)
+                    .font(.system(size: 24, weight: isSelected ? .semibold : .regular))
+                    .foregroundStyle(isSelected ? Color.blue : .secondary)
+                    .symbolEffect(.bounce, value: isSelected)
+                
+                Text(tab.title)
+                    .font(.system(size: 12, weight: isSelected ? .medium : .regular))
+                    .foregroundStyle(isSelected ? Color.blue : .secondary)
+            }
+            .frame(height: tabBarHeight)
+            .contentShape(Rectangle())
         }
-        .padding(.vertical, 8)
-        .background(isSelected ? Color.blue.opacity(0.1) : Color.clear)
-        .cornerRadius(10)
+        .buttonStyle(TabButtonStyle())
+    }
+    
+    private func handleTabSelection(_ tab: Tab) {
+        impactGenerator.impactOccurred()
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+            selectedTab = tab
+        }
     }
 }
+
+// Custom button style for tabs
+struct TabButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.95 : 1)
+            .animation(.easeOut(duration: 0.2), value: configuration.isPressed)
+    }
+}
+
+// Enhanced glass effect background
+struct Glass: View {
+    enum Style {
+        case light, dark
+    }
+    
+    let style: Style
+    
+    var body: some View {
+        ZStack {
+            Color(.systemBackground)
+                .opacity(style == .light ? 0.8 : 0.7)
+                .blur(radius: 3)
+            
+            Rectangle()
+                .fill(style == .light ? .white.opacity(0.1) : .black.opacity(0.1))
+            
+            Rectangle()
+                .stroke(style == .light ? .white.opacity(0.2) : .white.opacity(0.1), lineWidth: 1)
+        }
+    }
+}
+
+enum Tab: String, CaseIterable {
+    case prayer, qibla, tracker, settings
+
+    var title: String {
+        rawValue.capitalized
+    }
+
+    var icon: String {
+        switch self {
+        case .prayer: "sun.max.fill"
+        case .qibla: "location.north.line.fill"
+        case .tracker: "chart.bar.fill"
+        case .settings: "gearshape.fill"
+        }
+    }
+}
+

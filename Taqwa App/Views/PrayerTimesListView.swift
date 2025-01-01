@@ -5,61 +5,137 @@ struct PrayerTimesListView: View {
     let currentPrayer: String
     let currentTime: Date
     let selectedDate: Date
-
+    
     var body: some View {
         ScrollView {
-            VStack(spacing: 10) {
+            VStack(spacing: 12) {
                 ForEach(prayerTimes) { prayer in
-                    prayerRow(for: prayer)
+                    PrayerTimeRow(
+                        prayer: prayer,
+                        isCurrentPrayer: prayer.name == currentPrayer,
+                        isPastPrayer: isPastPrayer(prayer.time),
+                        isNextPrayer: isNextPrayer(prayer)
+                    )
                 }
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
         }
+        .background(Color(uiColor: .systemGray6))
     }
-
-    // Separate row rendering logic
-    private func prayerRow(for prayer: PrayerTime) -> some View {
+    
+    private func isPastPrayer(_ prayerTime: Date) -> Bool {
         let isToday = Calendar.current.isDateInToday(selectedDate)
-        let isPastPrayer = isToday ? (prayer.time < currentTime) : (selectedDate < Date())
-        let isCurrentPrayer = isToday && (prayer.name == currentPrayer)
+        if isToday {
+            return prayerTime < currentTime
+        } else {
+            return selectedDate < Date()
+        }
+    }
+    
+    private func isNextPrayer(_ prayer: PrayerTime) -> Bool {
+        guard let nextIndex = prayerTimes.firstIndex(where: { !isPastPrayer($0.time) }) else {
+            return false
+        }
+        return prayerTimes[nextIndex].name == prayer.name
+    }
+}
 
-        return HStack {
+struct PrayerTimeRow: View {
+    let prayer: PrayerTime
+    let isCurrentPrayer: Bool
+    let isPastPrayer: Bool
+    let isNextPrayer: Bool
+    
+    var body: some View {
+        HStack {
             Text(prayer.name)
-                .font(.headline)
-                .foregroundColor(isCurrentPrayer ? .blue : isPastPrayer ? .gray : .primary)
+                .font(.system(size: 17, weight: getTextWeight()))
+                .foregroundColor(getTextColor())
+            
             Spacer()
-            Text(prayer.time, formatter: Self.timeFormatter)
-                .font(.subheadline)
-                .foregroundColor(isPastPrayer ? .gray : .secondary)
-            Image(systemName: "bell")
-                .foregroundColor(isCurrentPrayer ? .blue : .gray)
+            
+            Text(prayer.time, formatter: PrayerTimeRow.timeFormatter)
+                .font(.system(size: 17))
+                .foregroundColor(getTimeColor())
+            
+            Image(systemName: "bell.fill")
+                .font(.system(size: 14))
+                .foregroundColor(getBellColor())
+                .padding(.leading, 12)
+                .opacity(isPastPrayer ? 0.5 : 1.0)
         }
-        .padding()
-        .background(rowBackground(isCurrentPrayer: isCurrentPrayer, isPastPrayer: isPastPrayer))
-        .cornerRadius(15)
-        .animation(.easeInOut, value: currentPrayer)
-        .transition(.scale.combined(with: .opacity))
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(getBackgroundColor())
+                .shadow(
+                    color: Color.black.opacity(isCurrentPrayer || isNextPrayer ? 0.08 : 0.04),
+                    radius: isCurrentPrayer || isNextPrayer ? 3 : 2,
+                    x: 0,
+                    y: 1
+                )
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(
+                    isCurrentPrayer ? Color.blue.opacity(0.2) : Color.clear,
+                    lineWidth: 1
+                )
+        )
     }
-
-    // Separate background logic
-    private func rowBackground(isCurrentPrayer: Bool, isPastPrayer: Bool) -> some View {
-        Group {
-            if isCurrentPrayer {
-                RoundedRectangle(cornerRadius: 15)
-                    .fill(Color.blue.opacity(0.1))
-            } else if isPastPrayer {
-                RoundedRectangle(cornerRadius: 15)
-                    .fill(Color.gray.opacity(0.1))
-            } else {
-                Color.clear
-            }
+    
+    private func getTextWeight() -> Font.Weight {
+        if isCurrentPrayer || isNextPrayer {
+            return .semibold
         }
+        return .regular
     }
-
-    // Date formatter for prayer times
-    private static var timeFormatter: DateFormatter {
+    
+    private func getTextColor() -> Color {
+        if isPastPrayer {
+            return .secondary
+        }
+        if isCurrentPrayer {
+            return .blue
+        }
+        return .primary
+    }
+    
+    private func getTimeColor() -> Color {
+        if isPastPrayer {
+            return .secondary.opacity(0.8)
+        }
+        if isCurrentPrayer || isNextPrayer {
+            return .primary
+        }
+        return .secondary
+    }
+    
+    private func getBellColor() -> Color {
+        if isPastPrayer {
+            return Color(.systemGray4)
+        }
+        if isCurrentPrayer {
+            return .blue
+        }
+        return Color(.systemGray3)
+    }
+    
+    private func getBackgroundColor() -> Color {
+        if isPastPrayer {
+            return Color(.systemBackground).opacity(0.97)
+        }
+        if isCurrentPrayer {
+            return Color(.systemBackground).opacity(0.99)
+        }
+        return Color(.systemBackground)
+    }
+    
+    private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.timeStyle = .short
+        formatter.dateFormat = "h:mm a"
         return formatter
-    }
+    }()
 }
