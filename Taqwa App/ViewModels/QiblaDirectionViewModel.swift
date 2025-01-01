@@ -21,6 +21,12 @@ class QiblaDirectionViewModel: NSObject, ObservableObject, CLLocationManagerDele
     private let locationManager = CLLocationManager()
     private let motionManager = CMMotionManager()
     private var headingOffset: Double = 0.0
+    
+    // Cache and throttling properties
+    private var lastGeocodedLocation: CLLocation?
+    private var lastGeocodeTime: Date?
+    private let minimumLocationDistance: CLLocationDistance = 500
+    private let geocodeInterval: TimeInterval = 60
 
     override init() {
         super.init()
@@ -28,7 +34,6 @@ class QiblaDirectionViewModel: NSObject, ObservableObject, CLLocationManagerDele
         startDeviceOrientationUpdates()
     }
     
-    // MARK: - Setup Location Manager
     private func setupLocationManager() {
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
@@ -37,7 +42,6 @@ class QiblaDirectionViewModel: NSObject, ObservableObject, CLLocationManagerDele
         locationManager.startUpdatingHeading()
     }
     
-    // MARK: - CLLocationManagerDelegate
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
         locationStatus = "Location Determined"
@@ -46,7 +50,46 @@ class QiblaDirectionViewModel: NSObject, ObservableObject, CLLocationManagerDele
         let qiblaDirection = Qibla(coordinates: coords).direction
         self.qiblaBearing = qiblaDirection
         
+        updateLocationNameIfNeeded(from: location)
+    }
+    
+    private func updateLocationNameIfNeeded(from location: CLLocation) {
+        // Check time threshold
+        if let lastTime = lastGeocodeTime,
+           Date().timeIntervalSince(lastTime) < geocodeInterval {
+            return
+        }
+        
+        // Check distance threshold
+        if let lastLocation = lastGeocodedLocation,
+           location.distance(from: lastLocation) < minimumLocationDistance {
+            return
+        }
+        
         fetchLocationName(from: location)
+        lastGeocodedLocation = location
+        lastGeocodeTime = Date()
+    }
+    
+    private func fetchLocationName(from location: CLLocation) {
+        let geocoder = CLGeocoder()
+        geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                if let error = error {
+                    self.errorMessage = "Location name unavailable"
+                    return
+                }
+                
+                if let placemark = placemarks?.first {
+                    let name = [placemark.locality, placemark.administrativeArea]
+                        .compactMap { $0 }
+                        .joined(separator: ", ")
+                    self.locationName = name.isEmpty ? "Unknown Location" : name
+                }
+            }
+        }
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
@@ -59,18 +102,6 @@ class QiblaDirectionViewModel: NSObject, ObservableObject, CLLocationManagerDele
         deviceHeading = newHeading.magneticHeading
     }
     
-    // MARK: - Fetch Location Name
-    private func fetchLocationName(from location: CLLocation) {
-        let geocoder = CLGeocoder()
-        geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, _ in
-            guard let placemark = placemarks?.first, let city = placemark.locality else { return }
-            DispatchQueue.main.async {
-                self?.locationName = city
-            }
-        }
-    }
-    
-    // MARK: - Device Orientation Updates
     private func startDeviceOrientationUpdates() {
         guard motionManager.isDeviceMotionAvailable else { return }
         motionManager.deviceMotionUpdateInterval = 0.02
