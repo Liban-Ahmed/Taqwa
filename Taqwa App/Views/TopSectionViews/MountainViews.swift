@@ -21,11 +21,6 @@ struct MountainRangeView: View {
             FrontMountainView(currentPrayer: currentPrayer)
                 .offset(y: 10)
                 .offset(x: scrollOffset * 0.1)
-
-            // Pine trees
-//            PineTreeGroup()
-//                .offset(y: 40)
-//                .offset(x: scrollOffset * 0.05)
         }
     }
 }

@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-
+import CoreLocation
 // MARK: - SUN / MOON INDICATOR (Colored Faded Rings)
 struct SunMoonIndicator: View {
     let isDaytime: Bool

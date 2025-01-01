@@ -1,9 +1,3 @@
-//
-//  DateSelectorView.swift.swift
-//  Taqwa App
-//
-//  Created by Liban Ahmed on 12/30/24.
-//
 import SwiftUI
 
 struct DateSelectorView: View {
@@ -14,42 +8,44 @@ struct DateSelectorView: View {
 
     var body: some View {
         HStack {
+            // Previous Date Button
             Button(action: onPreviousDate) {
                 Image(systemName: "chevron.left")
-                    .padding()
-                    .background(Color(.systemGray5))
-                    .cornerRadius(8)
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(Color.primary.opacity(0.8))
             }
             Spacer()
+
+            // Date Display - In single line with distinct styles
             VStack(spacing: 4) {
-                Text(selectedDate, formatter: Self.dateFormatter)
-                    .font(.headline)
-                    .foregroundColor(.primary)
+                Text(selectedDate, formatter: Self.fullDateFormatter)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(Color.primary)
                 Text(hijriDate)
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(Color.orange)
             }
+
             Spacer()
+
+            // Next Date Button
             Button(action: onNextDate) {
                 Image(systemName: "chevron.right")
-                    .padding()
-                    .background(Color(.systemGray5))
-                    .cornerRadius(8)
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(Color.primary.opacity(0.8))
             }
         }
-        .padding(.horizontal)
-        .background(
-            RoundedRectangle(cornerRadius: 15)
-                .fill(Color(.systemGray6))
-                .shadow(color: .gray.opacity(0.3), radius: 4, x: 0, y: 2)
-        )
-        .padding(.horizontal)
+        .padding(.vertical, 8)
+        .padding(.horizontal, 16)
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
     }
 
-    private static var dateFormatter: DateFormatter {
+    // Date Formatter for Full Date Display
+    private static let fullDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateStyle = .full
+        formatter.dateFormat = "EEEE d MMMM"  // Example: Monday 30th December
         return formatter
-    }
+    }()
 }
-

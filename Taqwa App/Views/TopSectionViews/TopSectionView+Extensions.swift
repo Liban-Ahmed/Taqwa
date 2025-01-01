@@ -10,43 +10,26 @@ extension TopSectionView {
     // MARK: - TIMELINE SECTION
     var timelineSection: some View {
         ZStack {
-            // 1. Curved Path for the whole day
-//            CurvedDayPath()
-//                .stroke(
-//                    LinearGradient(
-//                        gradient: Gradient(colors: [
-//                            Color.white.opacity(0.3),
-//                            Color.white.opacity(0.1)
-//                        ]),
-//                        startPoint: .leading,
-//                        endPoint: .trailing
-//                    ),
-//                    style: StrokeStyle(lineWidth: 4, lineCap: .round)
-//                )
-//                .frame(height: 100)
-//
-//            // 2. Colored stroke overlay for "progress" portion
-//            CurvedDayPath()
-//                .trim(from: 0, to: CGFloat(progress))
-//                .stroke(
-//                    Color.white.opacity(0.6),
-//                    style: StrokeStyle(lineWidth: 4, lineCap: .round)
-//                )
-//                .frame(height: 100)
-//                .animation(.easeInOut(duration: 0.8), value: progress)
-
             // Sun/Moon pinned top-right
             SunMoonIndicator(isDaytime: isDaytime)
                 .offset(x: 160, y: -90) // Hard-coded offset to top-right
-                .animation(.easeInOut(duration: 1), value: progress)
+                .animation(.easeInOut(duration: 1))
         }
         .padding(.horizontal, 30)
     }
 
     // MARK: - DAY/NIGHT CHECK
-    var isDaytime: Bool {
-        progress < 0.5
-    }
+        var isDaytime: Bool {
+            // Use the current prayer to determine day or night
+            switch currentPrayer {
+            case "Fajr", "Dhuhr", "Asr":
+                return true
+            case "Maghrib", "Isha":
+                return false
+            default:
+                return true // Default to daytime if unknown
+            }
+        }
 
     // MARK: - HELPER: PARALLAX OFFSET
     func parallaxOffset(base: CGFloat, rate: CGFloat) -> CGFloat {

@@ -10,7 +10,7 @@ import SwiftUI
 struct TopSectionView: View {
     let currentPrayer: String
     let timeRemaining: String
-    let progress: Double  // 0...1 representing the day's progression
+//    let progress: Double  // 0...1 representing the day's progression
 
     @State var fakeScrollOffset: CGFloat = 0
 

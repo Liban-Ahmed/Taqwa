@@ -1,3 +1,10 @@
+//
+//  PrayerTimesView.swift
+//  Taqwa App
+//
+//  Created by Liban Ahmed on 12/30/24.
+//
+
 import SwiftUI
 
 struct PrayerTimesView: View {
@@ -8,8 +15,7 @@ struct PrayerTimesView: View {
             // Top Section
             TopSectionView(
                 currentPrayer: viewModel.currentPrayer,
-                timeRemaining: viewModel.timeRemaining,
-                progress: viewModel.progress
+                timeRemaining: viewModel.timeRemaining
             )
 
             // Date Selector
@@ -29,7 +35,9 @@ struct PrayerTimesView: View {
             // Prayer Times List
             PrayerTimesListView(
                 prayerTimes: viewModel.prayerTimes,
-                currentPrayer: viewModel.currentPrayer
+                currentPrayer: viewModel.currentPrayer,
+                currentTime: Date(),
+                selectedDate: viewModel.selectedDate // Use viewModel.selectedDate here
             )
 
             // Bottom Navigation Bar
