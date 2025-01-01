@@ -13,14 +13,11 @@ struct MountainRangeView: View {
 
     var body: some View {
         ZStack {
-            // Back mountain
+            // Back mountain (now static)
             BackMountainView(currentPrayer: currentPrayer)
-                .offset(x: scrollOffset * 0.15)
 
-            // Front mountain
+            // Front mountain (now static)
             FrontMountainView(currentPrayer: currentPrayer)
-                .offset(y: 10)
-                .offset(x: scrollOffset * 0.1)
         }
     }
 }
