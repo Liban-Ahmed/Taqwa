@@ -4,6 +4,12 @@
 //
 //  Created by Liban Ahmed on 12/31/24.
 //
+//
+//  QiblaView.swift
+//  Qibla Direction App
+//
+//  Created by Liban Ahmed on 12/31/24.
+//
 import SwiftUI
 import CoreLocation
 import Combine
@@ -12,16 +18,17 @@ struct QiblaView: View {
     @StateObject private var viewModel = QiblaDirectionViewModel()
     
     private var adjustedBearing: Double {
-        let difference = viewModel.qiblaBearing - viewModel.deviceHeading
-        return (difference < 0) ? (difference + 360) : difference
+        let rawDifference = viewModel.qiblaBearing - viewModel.deviceHeading
+        let normalized = ((rawDifference + 180).truncatingRemainder(dividingBy: 360) - 180)
+        return normalized < -180 ? normalized + 360 : normalized
     }
     
     var body: some View {
         ZStack {
             // Background color transitions
-            Color(adjustedBearing < 10 ? .green : .gray)
+            Color(abs(adjustedBearing) < 10 ? .green : .gray)
                 .ignoresSafeArea()
-                .animation(.easeInOut, value: adjustedBearing)
+                .animation(.easeInOut(duration: 0.5), value: adjustedBearing)
             
             VStack(spacing: 30) {
                 // Location Title
@@ -41,11 +48,18 @@ struct QiblaView: View {
                         .foregroundColor(.white)
                         .frame(width: 200, height: 200)
                         .rotationEffect(.degrees(adjustedBearing))
-                        .animation(.spring(response: 0.6, dampingFraction: 0.8), value: adjustedBearing)
+                        .animation(
+                            .spring(
+                                response: 0.8,
+                                dampingFraction: 0.7,
+                                blendDuration: 0.5
+                            ),
+                            value: adjustedBearing
+                        )
                 }
                 
                 // Bearing Info
-                Text("\(Int(adjustedBearing))° \(adjustedBearing < 10 ? "Facing Qibla" : (adjustedBearing < 180 ? "to your Right" : "to your Left"))")
+                Text("\(Int(abs(adjustedBearing)))° \(abs(adjustedBearing) < 10 ? "Facing Qibla" : (adjustedBearing < 0 ? "Turn Left" : "Turn Right"))")
                     .font(.system(size: 20, weight: .semibold))
                     .foregroundColor(.white)
                     .padding(.top, 10)
