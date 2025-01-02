@@ -46,24 +46,32 @@ struct PrayerTimeRow: View {
     let isCurrentPrayer: Bool
     let isPastPrayer: Bool
     let isNextPrayer: Bool
+    @Environment(\.colorScheme) private var colorScheme
+    
+    private let hapticFeedback = UIImpactFeedbackGenerator(style: .light)
     
     var body: some View {
         HStack {
             Text(prayer.name)
                 .font(.system(size: 17, weight: getTextWeight()))
                 .foregroundColor(getTextColor())
+                .dynamicTypeSize(.large)
             
             Spacer()
             
             Text(prayer.time, formatter: PrayerTimeRow.timeFormatter)
                 .font(.system(size: 17))
                 .foregroundColor(getTimeColor())
+                .dynamicTypeSize(.large)
             
             Image(systemName: "bell.fill")
                 .font(.system(size: 14))
                 .foregroundColor(getBellColor())
                 .padding(.leading, 12)
                 .opacity(isPastPrayer ? 0.5 : 1.0)
+                .onTapGesture {
+                    hapticFeedback.impactOccurred()
+                }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
@@ -71,19 +79,20 @@ struct PrayerTimeRow: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(getBackgroundColor())
                 .shadow(
-                    color: Color.black.opacity(isCurrentPrayer || isNextPrayer ? 0.08 : 0.04),
-                    radius: isCurrentPrayer || isNextPrayer ? 3 : 2,
+                    color: getShadowColor(),
+                    radius: isCurrentPrayer || isNextPrayer ? 4 : 2,
                     x: 0,
-                    y: 1
+                    y: colorScheme == .dark ? -1 : 1
                 )
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .strokeBorder(
-                    isCurrentPrayer ? Color.blue.opacity(0.2) : Color.clear,
+                    isCurrentPrayer ? Color.blue.opacity(colorScheme == .dark ? 0.4 : 0.2) : Color.clear,
                     lineWidth: 1
                 )
         )
+        .animation(.easeInOut(duration: 0.2), value: isCurrentPrayer)
     }
     
     private func getTextWeight() -> Font.Weight {
@@ -95,22 +104,22 @@ struct PrayerTimeRow: View {
     
     private func getTextColor() -> Color {
         if isPastPrayer {
-            return .secondary
+            return colorScheme == .dark ? .gray : .secondary
         }
         if isCurrentPrayer {
             return .blue
         }
-        return .primary
+        return colorScheme == .dark ? .white : .primary
     }
     
     private func getTimeColor() -> Color {
         if isPastPrayer {
-            return .secondary.opacity(0.8)
+            return colorScheme == .dark ? .gray.opacity(0.8) : .secondary.opacity(0.8)
         }
         if isCurrentPrayer || isNextPrayer {
-            return .primary
+            return colorScheme == .dark ? .white : .primary
         }
-        return .secondary
+        return colorScheme == .dark ? .gray : .secondary
     }
     
     private func getBellColor() -> Color {
@@ -120,17 +129,34 @@ struct PrayerTimeRow: View {
         if isCurrentPrayer {
             return .blue
         }
-        return Color(.systemGray3)
+        return colorScheme == .dark ? Color(.systemGray2) : Color(.systemGray3)
     }
     
     private func getBackgroundColor() -> Color {
-        if isPastPrayer {
-            return Color(.systemBackground).opacity(0.97)
+        if colorScheme == .dark {
+            if isPastPrayer {
+                return Color(.systemGray6).opacity(0.97)
+            }
+            if isCurrentPrayer {
+                return Color(.systemGray5).opacity(0.99)
+            }
+            return Color(.systemGray6)
+        } else {
+            if isPastPrayer {
+                return Color(.systemBackground).opacity(0.97)
+            }
+            if isCurrentPrayer {
+                return Color(.systemBackground).opacity(0.99)
+            }
+            return Color(.systemBackground)
         }
-        if isCurrentPrayer {
-            return Color(.systemBackground).opacity(0.99)
+    }
+    
+    private func getShadowColor() -> Color {
+        if colorScheme == .dark {
+            return Color.white.opacity(isCurrentPrayer || isNextPrayer ? 0.05 : 0.02)
         }
-        return Color(.systemBackground)
+        return Color.black.opacity(isCurrentPrayer || isNextPrayer ? 0.08 : 0.04)
     }
     
     private static let timeFormatter: DateFormatter = {
