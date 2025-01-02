@@ -22,35 +22,13 @@ struct PrayerTimesView: View {
                         currentPrayer: viewModel.currentPrayer,
                         timeRemaining: viewModel.timeRemaining
                     )
-
-                    // Date Selector
-                    DateSelectorView(
-                        selectedDate: viewModel.selectedDate,
-                        hijriDate: viewModel.hijriDate,
-                        onPreviousDate: {
-                            viewModel.selectedDate = Calendar.current.date(byAdding: .day, value: -1, to: viewModel.selectedDate) ?? Date()
-                            viewModel.updatePrayerTimesForSelectedDate()
-                        },
-                        onNextDate: {
-                            viewModel.selectedDate = Calendar.current.date(byAdding: .day, value: 1, to: viewModel.selectedDate) ?? Date()
-                            viewModel.updatePrayerTimesForSelectedDate()
-                        }
-                    )
-
-                    // Prayer Times List
-                    PrayerTimesListView(
-                        prayerTimes: viewModel.prayerTimes,
-                        currentPrayer: viewModel.currentPrayer,
-                        currentTime: Date(),
-                        selectedDate: viewModel.selectedDate // Use viewModel.selectedDate here
-                    )
                 }
                 
             case .qibla:
                 QiblaView() // Show Qibla View when "Qibla" tab is selected
                 
             case .tracker:
-                Text("Tracker") // Placeholder for tracker content
+                TrackerView() // Placeholder for tracker content
                 
             case .settings:
                 Text("Settings") // Placeholder for settings content
