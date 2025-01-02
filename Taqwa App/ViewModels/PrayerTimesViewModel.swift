@@ -19,30 +19,30 @@ class PrayerTimesViewModel: ObservableObject {
     @Published var timeRemaining: String = "" // Time remaining until next prayer
     @Published var hijriDate: String = "" // Islamic calendar date
     @Published var progress: Double = 0.0 // Time progress for next prayer
-
+    
     private let prayerCalculationService = PrayerCalculationService()
     private let locationManager = LocationManager()
     private let geocoder = CLGeocoder()
     private var timer: Timer?
-
+    
     func fetchPrayerTimes(for date: Date) {
         locationManager.requestLocationAuthorization()
         locationManager.startUpdatingLocation { [weak self] location in
             guard let self = self else { return }
-
+            
             let latitude = location.coordinate.latitude
             let longitude = location.coordinate.longitude
-
+            
             // Fetch prayer times
             let prayerTimesForDay = self.prayerCalculationService.getPrayerTimes(location: (latitude, longitude), date: date)
-
+            
             // Update current and next prayer
             self.scheduleTimer(for: prayerTimesForDay.times, location: location)
-
+            
             // Perform reverse geocoding
             self.geocoder.reverseGeocodeLocation(location) { placemarks, error in
                 let locationName = placemarks?.first?.locality ?? "Unknown Location"
-
+                
                 // Update the published properties
                 DispatchQueue.main.async {
                     self.prayerTimes = prayerTimesForDay.times
@@ -52,20 +52,26 @@ class PrayerTimesViewModel: ObservableObject {
             }
         }
     }
-
+    
     func updatePrayerTimesForSelectedDate() {
         fetchPrayerTimes(for: selectedDate)
     }
-
+    
     private func scheduleTimer(for prayerTimes: [PrayerTime], location: CLLocation) {
         timer?.invalidate() // Cancel any existing timer
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             self?.updateCurrentAndNextPrayer(prayerTimes: prayerTimes)
         }
     }
-
+    
     private func updateCurrentAndNextPrayer(prayerTimes: [PrayerTime]) {
         let currentTime = Date()
+        // If selectedDate is not today, use current day for next prayer
+        guard Calendar.current.isDateInToday(selectedDate) else {
+            // Keep the logic defaulting to today's times
+            return
+        }
+
         let nextPrayerIndex = prayerTimes.firstIndex(where: { $0.time > currentTime })
         var currentPrayer: String = ""
         var timeRemaining: String = ""
@@ -75,38 +81,75 @@ class PrayerTimesViewModel: ObservableObject {
             let nextPrayer = prayerTimes[nextPrayerIndex]
             let nextPrayerTime = nextPrayer.time
 
-            // Calculate progress
             let totalInterval = nextPrayerTime.timeIntervalSince(currentPrayerTime)
             let elapsedInterval = currentTime.timeIntervalSince(currentPrayerTime)
-            let progress = max(0, min(1, elapsedInterval / totalInterval)) // Ensure progress is between 0 and 1
+            let progress = max(0, min(1, elapsedInterval / totalInterval))
 
             currentPrayer = nextPrayerIndex > 0 ? prayerTimes[nextPrayerIndex - 1].name : "Isha"
-            let remainingTime = nextPrayerTime.timeIntervalSince(currentTime)
-            let hours = Int(remainingTime) / 3600
-            let minutes = (Int(remainingTime) % 3600) / 60
-            timeRemaining = "\(hours) hr \(minutes) mins until \(nextPrayer.name)"
 
-            // Update published properties
+            let remainingSecondsTotal = Int(nextPrayerTime.timeIntervalSince(currentTime))
+            if remainingSecondsTotal <= 0 {
+                timeRemaining = "0 secs"
+            } else {
+                let hrs = remainingSecondsTotal / 3600
+                let mins = (remainingSecondsTotal % 3600) / 60
+                let secs = remainingSecondsTotal % 60
+
+                if hrs > 0 {
+                    timeRemaining = hrs > 1
+                    ? "\(hrs) hrs \(mins) mins"
+                    : "\(hrs) hr \(mins) mins"
+                } else if mins > 0 {
+                    timeRemaining = mins > 1
+                    ? "\(mins) mins \(secs) secs"
+                    : "\(mins) min \(secs) secs"
+                } else {
+                    timeRemaining = secs > 1
+                    ? "\(secs) secs"
+                    : "\(secs) sec"
+                }
+            }
+            timeRemaining += " until \(nextPrayer.name)"
+
             DispatchQueue.main.async {
                 self.currentPrayer = currentPrayer
                 self.timeRemaining = timeRemaining
                 self.progress = progress
             }
         } else {
-            // Handle Isha to Fajr transition
-            let fajrTomorrow = prayerTimes.first!.time.addingTimeInterval(86400) // Add 24 hours to Fajr
+            // Next day scenario
+            let fajrTomorrow = prayerTimes.first!.time.addingTimeInterval(86400)
             let lastPrayerTime = prayerTimes.last!.time
             let totalInterval = fajrTomorrow.timeIntervalSince(lastPrayerTime)
             let elapsedInterval = currentTime.timeIntervalSince(lastPrayerTime)
-            let progress = max(0, min(1, elapsedInterval / totalInterval)) // Ensure progress is between 0 and 1
+            let progress = max(0, min(1, elapsedInterval / totalInterval))
 
             currentPrayer = "Isha"
-            let remainingTime = fajrTomorrow.timeIntervalSince(currentTime)
-            let hours = Int(remainingTime) / 3600
-            let minutes = (Int(remainingTime) % 3600) / 60
-            timeRemaining = "\(hours) hr \(minutes) mins until Fajr"
 
-            // Update published properties
+            let remainingSecondsTotal = Int(fajrTomorrow.timeIntervalSince(currentTime))
+            if remainingSecondsTotal <= 0 {
+                timeRemaining = "0 secs"
+            } else {
+                let hrs = remainingSecondsTotal / 3600
+                let mins = (remainingSecondsTotal % 3600) / 60
+                let secs = remainingSecondsTotal % 60
+
+                if hrs > 0 {
+                    timeRemaining = hrs > 1
+                    ? "\(hrs) hrs \(mins) mins"
+                    : "\(hrs) hr \(mins) mins"
+                } else if mins > 0 {
+                    timeRemaining = mins > 1
+                    ? "\(mins) mins \(secs) secs"
+                    : "\(mins) min \(secs) secs"
+                } else {
+                    timeRemaining = secs > 1
+                    ? "\(secs) secs"
+                    : "\(secs) sec"
+                }
+            }
+            timeRemaining += " until Fajr"
+
             DispatchQueue.main.async {
                 self.currentPrayer = currentPrayer
                 self.timeRemaining = timeRemaining

@@ -12,7 +12,7 @@ struct PrayerTimesListView: View {
                 ForEach(prayerTimes) { prayer in
                     PrayerTimeRow(
                         prayer: prayer,
-                        isCurrentPrayer: prayer.name == currentPrayer,
+                        isCurrentPrayer: (prayer.name == currentPrayer && Calendar.current.isDateInToday(selectedDate)),
                         isPastPrayer: isPastPrayer(prayer.time),
                         isNextPrayer: isNextPrayer(prayer)
                     )
@@ -25,15 +25,24 @@ struct PrayerTimesListView: View {
     }
     
     private func isPastPrayer(_ prayerTime: Date) -> Bool {
-        let isToday = Calendar.current.isDateInToday(selectedDate)
-        if isToday {
+        let dayComparison = Calendar.current.compare(selectedDate, to: Date(), toGranularity: .day)
+        switch dayComparison {
+        case .orderedAscending:
+            // The selected date is before today: all prayers are past
+            return true
+        case .orderedSame:
+            // Same day: compare exact time
             return prayerTime < currentTime
-        } else {
-            return selectedDate < Date()
+        case .orderedDescending:
+            // Future day: none are past
+            return false
         }
     }
     
     private func isNextPrayer(_ prayer: PrayerTime) -> Bool {
+        guard Calendar.current.isDateInToday(selectedDate) else {
+            return false
+        }
         guard let nextIndex = prayerTimes.firstIndex(where: { !isPastPrayer($0.time) }) else {
             return false
         }
