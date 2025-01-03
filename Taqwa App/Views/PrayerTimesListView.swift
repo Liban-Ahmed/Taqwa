@@ -22,11 +22,11 @@ struct PrayerTimesListView: View {
             .padding(.vertical, 12)
         }
         .background(
-                        LinearGradient(
-                            gradient: Gradient(colors: [
-                                Color(red: 226/255, green: 230/255, blue: 224/255),
-                                Color(red: 216/255, green: 222/255, blue: 210/255)
-                            ]),
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.05, green: 0.10, blue: 0.30),
+                    Color(red: 0.50, green: 0.25, blue: 0.60)
+                ]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -153,20 +153,20 @@ struct PrayerTimeRow: View {
     private func getBackgroundColor() -> Color {
         if colorScheme == .dark {
             if isPastPrayer {
-                return Color(red: 146/255, green: 163/255, blue: 121/255).opacity(0.97)
+                return Color.blue.opacity(0.15).opacity(0.97)
             }
             if isCurrentPrayer {
-                return Color(.systemGray5).opacity(0.99)
+                return Color.blue.opacity(0.15).opacity(0.99)
             }
-            return Color(red: 146/255, green: 163/255, blue: 121/255)
+            return Color.blue.opacity(0.15)
         } else {
             if isPastPrayer {
-                return Color(red: 146/255, green: 163/255, blue: 121/255).opacity(0.97)
+                return Color.blue.opacity(0.15).opacity(0.97)
             }
             if isCurrentPrayer {
-                return Color(.systemGray5).opacity(0.99)
+                return Color.blue.opacity(0.15).opacity(0.99)
             }
-            return Color(red: 146/255, green: 163/255, blue: 121/255)
+            return Color.blue.opacity(0.15)
         }
     }
     
