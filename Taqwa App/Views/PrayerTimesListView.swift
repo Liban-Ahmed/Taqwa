@@ -32,7 +32,7 @@ struct PrayerTimesListView: View {
                         )
                     )
     }
-    
+     
     private func isPastPrayer(_ prayerTime: Date) -> Bool {
         let dayComparison = Calendar.current.compare(selectedDate, to: Date(), toGranularity: .day)
         switch dayComparison {

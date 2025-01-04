@@ -19,48 +19,28 @@ struct PrayerTimesView: View {
                 VStack {
                     // Top Section
                     TopSectionView(
+                        currentPrayer: viewModel.currentPrayer,
                         timeRemaining: viewModel.timeRemaining
                     )
-                    // Quick Actions Grid
-                    HStack(spacing: 16) {
-                               VStack(spacing: 8) {
-                                   HStack {
-                                       Text("Today's Prayers")
-                                           .font(.headline)
-                                       Spacer()
-                                       Image(systemName: "calendar")
-                                           .font(.system(size: 18))
-                                           .foregroundColor(.blue)
-                                   }
-                                   Text("5/5 Completed")
-                                       .font(.subheadline)
-                                       .foregroundColor(.gray)
-                               }
-                               .padding()
-                               .background(Color(.systemBackground))
-                               .cornerRadius(12)
-                               .shadow(radius: 4)
-                               
-                               VStack(spacing: 8) {
-                                   HStack {
-                                       Text("Qibla")
-                                           .font(.headline)
-                                       Spacer()
-                                       Image(systemName: "location.north.line.fill")
-                                           .font(.system(size: 18))
-                                           .foregroundColor(.blue)
-                                   }
-                                   Text("125° NE")
-                                       .font(.subheadline)
-                                       .foregroundColor(.gray)
-                               }
-                               .padding()
-                               .background(Color(.systemBackground))
-                               .cornerRadius(12)
-                               .shadow(radius: 4)
-                           }
+                    // Grid Section
+                    GridLayoutView()
+                        .padding(.horizontal)
+                        .padding(.top, 20)
+                        .padding(.bottom, 30)
                        }
                        .padding(.top, 16)
+                       .background(
+                           LinearGradient(
+                               gradient: Gradient(colors: [
+                                   Color(red: 0.05, green: 0.10, blue: 0.30),
+                                   Color(red: 0.50, green: 0.25, blue: 0.60)
+                               ]),
+                               startPoint: .topLeading,
+                               endPoint: .bottomTrailing
+                           )
+                       )
+                
+                
                 
             case .qibla:
                 QiblaView() // Show Qibla View when "Qibla" tab is selected
