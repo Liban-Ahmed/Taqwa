@@ -7,6 +7,7 @@
 import SwiftUI
 
 struct GridLayoutView: View {
+    @Binding var selectedTab: Tab
     @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
@@ -15,7 +16,11 @@ struct GridLayoutView: View {
             GridItem(.flexible())
         ], spacing: 16) {
             // Prayer Tracker
-            NavigationLink(destination: TrackerView()) {
+            Button {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    selectedTab = .tracker
+                }
+            } label: {
                 GridCard(
                     title: "Prayer Tracker",
                     iconName: "chart.bar.fill",
@@ -33,7 +38,11 @@ struct GridLayoutView: View {
             )
             
             // Qibla
-            NavigationLink(destination: QiblaView()) {
+            Button {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    selectedTab = .qibla
+                }
+            } label: {
                 GridCard(
                     title: "Qibla",
                     iconName: "location.north.line.fill",
@@ -50,6 +59,7 @@ struct GridLayoutView: View {
                 description: "Find local mosques"
             )
         }
+        .padding(.horizontal)
     }
 }
 
@@ -59,11 +69,11 @@ struct GridCard: View {
     let color: Color
     let description: String
     
+    @Environment(\.colorScheme) private var colorScheme
     @State private var isPressed = false
     
     var body: some View {
         VStack(spacing: 12) {
-            // Icon
             Image(systemName: iconName)
                 .font(.system(size: 30))
                 .foregroundColor(color)
@@ -77,18 +87,31 @@ struct GridCard: View {
                         .stroke(color.opacity(0.3), lineWidth: 1)
                 )
             
-            // Title and Description
             VStack(spacing: 4) {
                 Text(title)
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.primary)
+                    .foregroundStyle(Color.primary)
                 
                 Text(description)
                     .font(.system(size: 12))
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(Color.secondary)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
             }
         }
+        .padding(.vertical, 16)
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.secondarySystemBackground))
+                .shadow(
+                    color: Color.black.opacity(colorScheme == .dark ? 0.3 : 0.1),
+                    radius: 8,
+                    x: 0,
+                    y: 2
+                )
+        )
+        .scaleEffect(isPressed ? 0.98 : 1)
+        .animation(.easeOut(duration: 0.2), value: isPressed)
     }
 }
