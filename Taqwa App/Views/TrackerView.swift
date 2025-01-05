@@ -11,7 +11,7 @@ struct TrackerView: View {
                 .fontWeight(.bold)
                 .padding()
             
-            // Moved DateSelectorView
+            // Updated DateSelectorView with onToday
             DateSelectorView(
                 selectedDate: viewModel.selectedDate,
                 hijriDate: viewModel.hijriDate,
@@ -21,6 +21,10 @@ struct TrackerView: View {
                 },
                 onNextDate: {
                     viewModel.selectedDate = Calendar.current.date(byAdding: .day, value: 1, to: viewModel.selectedDate) ?? Date()
+                    viewModel.updatePrayerTimesForSelectedDate()
+                },
+                onToday: {
+                    viewModel.selectedDate = Date()
                     viewModel.updatePrayerTimesForSelectedDate()
                 }
             )

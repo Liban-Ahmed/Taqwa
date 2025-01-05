@@ -6,6 +6,9 @@ struct DateSelectorView: View {
     let hijriDate: String
     let onPreviousDate: () -> Void
     let onNextDate: () -> Void
+
+    // New closure
+    let onToday: () -> Void
     
     @Environment(\.colorScheme) private var colorScheme
     @State private var isPressed = false
@@ -19,6 +22,25 @@ struct DateSelectorView: View {
     }()
     
     var body: some View {
+        VStack(spacing: 8) {
+            // "Today" button now on top
+            Button(action: {
+                hapticFeedback.impactOccurred()
+                onToday()
+            }) {
+                Text("Today")
+                    .font(.system(size: 16, weight: .semibold))
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 12)
+                    .background(Color.clear)
+                    .foregroundColor(.blue)
+                    .cornerRadius(6)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(Color.blue, lineWidth: 1)
+                    )
+        }
+        }
         HStack {
             // Previous Date Button
             DateNavigationButton(
