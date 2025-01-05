@@ -18,6 +18,12 @@ class PrayerTimesViewModel: ObservableObject {
     private let locationManager = LocationManager()
     private let geocoder = CLGeocoder()
     private var timer: Timer?
+
+    // Use day-only for stable keys
+    private func dayKey(for date: Date) -> String {
+        let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
+        return "\(components.year!)-\(components.month!)-\(components.day!)"
+    }
     
     func fetchPrayerTimes(for date: Date) {
         locationManager.requestLocationAuthorization()
@@ -61,10 +67,28 @@ class PrayerTimesViewModel: ObservableObject {
         }
     }
     
+    // Save status using dayKey
     func savePrayerState(for prayer: PrayerTime) {
-        let key = "\(selectedDate)-\(prayer.name)"
+        let baseKey = dayKey(for: selectedDate)
+        let key = "\(baseKey)-\(prayer.name)"
         UserDefaults.standard.set(prayer.status.rawValue, forKey: key)
-        print("Saved \(prayer.name) status: \(prayer.status.rawValue) for date: \(selectedDate)")
+        UserDefaults.standard.synchronize()
+        print("Saved \(prayer.name) status: \(prayer.status.rawValue) for date: \(baseKey)")
+    }
+
+    func loadPrayerStates() {
+        let baseKey = dayKey(for: selectedDate)
+        for index in prayerTimes.indices {
+            let prayerName = prayerTimes[index].name
+            let key = "\(baseKey)-\(prayerName)"
+            if let savedStatus = UserDefaults.standard.string(forKey: key),
+               let status = PrayerStatus(rawValue: savedStatus) {
+                prayerTimes[index].status = status
+                print("Loaded \(prayerName) status: \(status.rawValue) for date: \(baseKey)")
+            } else {
+                print("No saved status for \(prayerName) on date: \(baseKey)")
+            }
+        }
     }
     
     private func updateCurrentAndNextPrayer(prayerTimes: [PrayerTime]) {
@@ -161,16 +185,4 @@ class PrayerTimesViewModel: ObservableObject {
         }
     }
     
-    func loadPrayerStates() {
-        for index in prayerTimes.indices {
-            let key = "\(selectedDate)-\(prayerTimes[index].name)"
-            if let savedStatus = UserDefaults.standard.string(forKey: key),
-               let status = PrayerStatus(rawValue: savedStatus) {
-                prayerTimes[index].status = status
-                print("Loaded \(prayerTimes[index].name) status: \(status.rawValue) for date: \(selectedDate)")
-            } else {
-                print("No saved status for \(prayerTimes[index].name) on date: \(selectedDate)")
-            }
-        }
-    }
 }
