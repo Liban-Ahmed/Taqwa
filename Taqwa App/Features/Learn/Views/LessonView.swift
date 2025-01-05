@@ -16,7 +16,7 @@ struct LessonView: View {
             VStack(alignment: .leading, spacing: 0) {
                 // Header Section
                 headerSection
-                    .background(colorScheme == .dark ? Color(.systemBackground) : .white)
+                    
                 
                 // Content Section
                 contentSection
@@ -163,11 +163,11 @@ struct LessonView: View {
     private var backgroundColor: some View {
         LinearGradient(
             gradient: Gradient(colors: [
-                Color(.systemBackground),
-                Color(.systemBackground).opacity(0.95)
+                Color(red: 0.05, green: 0.10, blue: 0.30),
+                Color(red: 0.50, green: 0.25, blue: 0.60)
             ]),
-            startPoint: .top,
-            endPoint: .bottom
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
         )
         .ignoresSafeArea()
     }
