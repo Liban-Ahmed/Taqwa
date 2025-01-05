@@ -30,12 +30,14 @@ struct GridLayoutView: View {
             }
             
             // Learn
-            GridCard(
-                title: "Learn",
-                iconName: "book.fill",
-                color: .green,
-                description: "Islamic teachings"
-            )
+            NavigationLink(destination: LearnView()) {
+                            GridCard(
+                                title: "Learn",
+                                iconName: "book.fill",
+                                color: .green,
+                                description: "Islamic teachings"
+                            )
+                        }
             
             // Qibla
             Button {
