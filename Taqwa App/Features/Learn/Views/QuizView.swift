@@ -29,47 +29,195 @@ struct QuizView: View {
             )
             .ignoresSafeArea()
             
-            if showScore {
-                scoreView
-            } else {
-                quizContent
+            VStack(spacing: 0) {
+                // Header Section
+                headerSection
+                
+                if showScore {
+                    scoreView
+                } else {
+                    quizContent
+                }
             }
         }
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarHidden(true)
+    }
+    
+    private var headerSection: some View {
+        VStack(spacing: 16) {
+            // Back button and progress
+            HStack {
+                Button(action: { dismiss() }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.left")
+                        Text("Back to Lesson")
+                    }
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                }
+                
+                Spacer()
+                
+                if !showScore {
+                    Text("Score: \(score)")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+            }
+            .padding(.horizontal)
+            
+            // Progress bars
+            if !showScore {
+                progressBars
+            }
+        }
+        .padding(.top, 16)
+        .background(.ultraThinMaterial.opacity(0.3))
+    }
+    
+    private var progressBars: some View {
+        HStack(spacing: 4) {
+            ForEach(0..<questions.count, id: \.self) { index in
+                Capsule()
+                    .fill(Color.white.opacity(0.3))
+                    .overlay(
+                        Capsule()
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color(red: 0.95, green: 0.75, blue: 0.45),
+                                        Color(red: 1.00, green: 0.88, blue: 0.60)
+                                    ],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .opacity(index <= currentQuestionIndex ? 1 : 0)
+                    )
+                    .frame(height: 3)
+            }
+        }
+        .padding(.horizontal)
+        .padding(.bottom, 8)
     }
     
     private var quizContent: some View {
-        VStack(spacing: 24) {
-            progressHeader
+        VStack(spacing: 32) {
+            Spacer()
             
-            questionContent
+            // Question number
+            Text("Question \(currentQuestionIndex + 1) of \(questions.count)")
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.white.opacity(0.8))
             
-            optionsGrid
+            // Question
+            Text(questions[currentQuestionIndex].question)
+                .font(.system(size: 24, weight: .bold))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 24)
+            
+            // Options
+            VStack(spacing: 16) {
+                ForEach(0..<questions[currentQuestionIndex].options.count, id: \.self) { index in
+                    Button {
+                        if !isAnswerLocked {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                selectAnswer(index)
+                            }
+                        }
+                    } label: {
+                        Text(questions[currentQuestionIndex].options[index])
+                            .font(.system(.body, design: .rounded))
+                            .fontWeight(.medium)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(backgroundColor(for: index))
+                                    .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
+                            )
+                    }
+                    .scaleEffect(selectedAnswer == index ? 0.98 : 1)
+                    .disabled(isAnswerLocked)
+                }
+            }
+            .padding(.horizontal, 24)
+            
+            Spacer()
         }
-        .padding()
     }
     
-    private var progressHeader: some View {
-        VStack(spacing: 8) {
-            // Progress indicator
-            HStack {
-                Text("Question \(currentQuestionIndex + 1) of \(questions.count)")
-                    .foregroundColor(.white)
-                Spacer()
-                Text("Score: \(score)")
-                    .foregroundColor(.white)
-            }
-            .font(.headline)
+    private var scoreView: some View {
+        VStack(spacing: 32) {
+            Spacer()
             
-            // Progress bar
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    Rectangle()
-                        .fill(Color.white.opacity(0.3))
-                        .frame(height: 4)
+            // Score icon
+            ZStack {
+                Circle()
+                    .fill(Color.green.opacity(0.15))
+                    .frame(width: 120, height: 120)
+                
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 60))
+                    .foregroundColor(.green)
+            }
+            
+            // Score text
+            VStack(spacing: 16) {
+                Text("Quiz Complete!")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                
+                Text("\(score) out of \(questions.count) correct")
+                    .font(.title2)
+                    .foregroundColor(.white.opacity(0.8))
+                
+                // Percentage and message
+                VStack(spacing: 8) {
+                    Text("\(Int((Double(score) / Double(questions.count)) * 100))%")
+                        .font(.system(size: 36, weight: .bold))
+                        .foregroundColor(.white)
                     
-                    Rectangle()
-                        .fill(
+                    Text(scoreMessage)
+                        .font(.system(size: 16))
+                        .foregroundColor(.white.opacity(0.8))
+                }
+                .padding(.top, 8)
+            }
+            
+            Spacer()
+            
+            // Action buttons
+            VStack(spacing: 16) {
+                Button {
+                    // Retry quiz
+                    withAnimation {
+                        resetQuiz()
+                    }
+                } label: {
+                    Text("Try Again")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.white.opacity(0.2))
+                        )
+                }
+                
+                Button {
+                    dismiss()
+                } label: {
+                    Text("Back to Lesson")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(
                             LinearGradient(
                                 colors: [
                                     Color(red: 0.95, green: 0.75, blue: 0.45),
@@ -79,90 +227,26 @@ struct QuizView: View {
                                 endPoint: .trailing
                             )
                         )
-                        .frame(width: geometry.size.width * CGFloat(currentQuestionIndex + 1) / CGFloat(questions.count), height: 4)
+                        .cornerRadius(12)
                 }
-                .clipShape(RoundedRectangle(cornerRadius: 2))
             }
-            .frame(height: 4)
+            .padding(.horizontal, 24)
+            .padding(.bottom, 32)
         }
     }
     
-    private var questionContent: some View {
-        Text(questions[currentQuestionIndex].question)
-            .font(.title3)
-            .fontWeight(.semibold)
-            .foregroundColor(.white)
-            .multilineTextAlignment(.center)
-            .padding(.vertical)
-    }
-    
-    private var optionsGrid: some View {
-        VStack(spacing: 16) {
-            ForEach(0..<questions[currentQuestionIndex].options.count, id: \.self) { index in
-                Button {
-                    if !isAnswerLocked {
-                        selectAnswer(index)
-                    }
-                } label: {
-                    Text(questions[currentQuestionIndex].options[index])
-                        .font(.system(.body, design: .rounded))
-                        .fontWeight(.medium)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(backgroundColor(for: index))
-                        )
-                }
-                .disabled(isAnswerLocked)
-            }
+    private var scoreMessage: String {
+        let percentage = Double(score) / Double(questions.count)
+        switch percentage {
+        case 1.0:
+            return "Perfect! Excellent work!"
+        case 0.8..<1.0:
+            return "Great job! Keep it up!"
+        case 0.6..<0.8:
+            return "Good effort! Room for improvement."
+        default:
+            return "Keep practicing! You'll get better."
         }
-    }
-    
-    private var scoreView: some View {
-        VStack(spacing: 24) {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 60))
-                .foregroundColor(.green)
-            
-            Text("Quiz Complete!")
-                .font(.title)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
-            
-            Text("Your Score")
-                .font(.title2)
-                .foregroundColor(.white.opacity(0.8))
-            
-            Text("\(score) out of \(questions.count)")
-                .font(.title)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
-            
-            Button {
-                dismiss()
-            } label: {
-                Text("Finish")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(
-                        LinearGradient(
-                            colors: [
-                                Color(red: 0.95, green: 0.75, blue: 0.45),
-                                Color(red: 1.00, green: 0.88, blue: 0.60)
-                            ],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .cornerRadius(12)
-            }
-            .padding(.top, 32)
-        }
-        .padding()
     }
     
     private func backgroundColor(for index: Int) -> Color {
@@ -193,14 +277,30 @@ struct QuizView: View {
             score += 1
         }
         
+        // Add haptic feedback
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             if currentQuestionIndex < questions.count - 1 {
-                currentQuestionIndex += 1
-                selectedAnswer = nil
-                isAnswerLocked = false
+                withAnimation {
+                    currentQuestionIndex += 1
+                    selectedAnswer = nil
+                    isAnswerLocked = false
+                }
             } else {
-                showScore = true
+                withAnimation {
+                    showScore = true
+                }
             }
         }
+    }
+    
+    private func resetQuiz() {
+        currentQuestionIndex = 0
+        selectedAnswer = nil
+        score = 0
+        isAnswerLocked = false
+        showScore = false
     }
 }
