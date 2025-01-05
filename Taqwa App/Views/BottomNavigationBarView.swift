@@ -30,8 +30,6 @@ struct BottomNavigationBarView: View {
             }
         }
         .frame(height: tabBarHeight)
-        .background(.ultraThinMaterial.opacity(0.7))
-        .clipShape(RoundedRectangle(cornerRadius: 25))
         .padding(.horizontal)
     }
     
