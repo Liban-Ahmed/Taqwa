@@ -80,17 +80,18 @@ struct DateSelectorView: View {
         .padding(.vertical, 12)
         .padding(.horizontal, 16)
         .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            colorScheme == .dark ? Color(.systemGray6) : .white,
-                            colorScheme == .dark ? Color(.systemGray5) : Color(.systemGray6).opacity(0.5)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
+            // RoundedRectangle(cornerRadius: 12)
+            //     .fill(
+            //         LinearGradient(
+            //             colors: [
+            //                 colorScheme == .dark ? Color(.systemGray6) : .white,
+            //                 colorScheme == .dark ? Color(.systemGray5) : Color(.systemGray6).opacity(0.5)
+            //             ],
+            //             startPoint: .top,
+            //             endPoint: .bottom
+            //         )
+            //     )
+            Color.clear
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
