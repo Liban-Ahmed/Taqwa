@@ -5,7 +5,6 @@
 //  Created by Liban Ahmed on 1/4/25.
 //
 import SwiftUI
-
 struct LearnView: View {
     @StateObject private var viewModel = LearnViewModel()
     
@@ -37,7 +36,6 @@ struct LearnView: View {
         }
     }
 }
-
 struct ModuleRowView: View {
     let module: Module
     
