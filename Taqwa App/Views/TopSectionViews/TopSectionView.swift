@@ -49,7 +49,7 @@ struct TopSectionView: View {
                     Spacer()
                 }
                 // MOVED TEXT UP
-                .padding(.top, -180)
+                .padding(.top, -140)
 
                 // (C) Mountainous Landscape + Pine Trees + Parallax
                 MountainRangeView(currentPrayer: currentPrayer,
@@ -58,11 +58,9 @@ struct TopSectionView: View {
                     .padding(.top, 20)
                     // Parallax effect
                     .offset(y: parallaxOffset(base: 0.0, rate: 0.3))
-
-                Spacer()
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: 320)
+        .frame(maxWidth: .infinity, maxHeight: 250)
         .cornerRadius(25)
         .shadow(color: .gray.opacity(0.4), radius: 10, x: 0, y: 4)
         .padding(.horizontal)

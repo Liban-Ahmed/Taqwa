@@ -1,12 +1,25 @@
 import SwiftUI
-
 struct BottomNavigationBarView: View {
     @Binding var selectedTab: Tab
-    @Environment(\.colorScheme) private var colorScheme
     @Namespace private var animation
     
     private let tabBarHeight: CGFloat = 60
     private let impactGenerator = UIImpactFeedbackGenerator(style: .light)
+    
+    private let selectedGradient = LinearGradient(
+        colors: [
+            Color(red: 0.95, green: 0.75, blue: 0.45),
+            Color(red: 1.00, green: 0.88, blue: 0.60)
+        ],
+        startPoint: .top,
+        endPoint: .bottom
+    )
+    
+    private let unselectedGradient = LinearGradient(
+        colors: [Color.secondary, Color.secondary],
+        startPoint: .top,
+        endPoint: .bottom
+    )
     
     var body: some View {
         HStack(spacing: 0) {
@@ -17,11 +30,6 @@ struct BottomNavigationBarView: View {
             }
         }
         .frame(height: tabBarHeight)
-        .background(
-            Glass(style: colorScheme == .dark ? .dark : .light)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 25))
-        .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: -5)
         .padding(.horizontal)
     }
     
@@ -33,29 +41,29 @@ struct BottomNavigationBarView: View {
         }) {
             VStack(spacing: 4) {
                 Image(systemName: tab.icon)
-                    .font(.system(size: 24, weight: isSelected ? .semibold : .regular))
-                    .foregroundStyle(isSelected ? Color.blue : .secondary)
-                    .symbolEffect(.bounce, value: isSelected)
+                    .font(.system(size: 24))
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(isSelected ? selectedGradient : unselectedGradient)
+                    .frame(height: 30)
                 
                 Text(tab.title)
                     .font(.system(size: 12, weight: isSelected ? .medium : .regular))
-                    .foregroundStyle(isSelected ? Color.blue : .secondary)
+                    .foregroundStyle(isSelected ? selectedGradient : unselectedGradient)
             }
-            .frame(height: tabBarHeight)
-            .contentShape(Rectangle())
+            .frame(height: tabBarHeight - 10)
+            .frame(maxWidth: .infinity)
         }
         .buttonStyle(TabButtonStyle())
     }
     
     private func handleTabSelection(_ tab: Tab) {
-        impactGenerator.impactOccurred()
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-            selectedTab = tab
+            impactGenerator.impactOccurred()
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                selectedTab = tab
+            }
         }
-    }
 }
 
-// Custom button style for tabs
 struct TabButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -64,36 +72,13 @@ struct TabButtonStyle: ButtonStyle {
     }
 }
 
-// Enhanced glass effect background
-struct Glass: View {
-    enum Style {
-        case light, dark
-    }
-    
-    let style: Style
-    
-    var body: some View {
-        ZStack {
-            Color(.systemBackground)
-                .opacity(style == .light ? 0.8 : 0.7)
-                .blur(radius: 3)
-            
-            Rectangle()
-                .fill(style == .light ? .white.opacity(0.1) : .black.opacity(0.1))
-            
-            Rectangle()
-                .stroke(style == .light ? .white.opacity(0.2) : .white.opacity(0.1), lineWidth: 1)
-        }
-    }
-}
-
 enum Tab: String, CaseIterable {
     case prayer, qibla, tracker, settings
-
+    
     var title: String {
         rawValue.capitalized
     }
-
+    
     var icon: String {
         switch self {
         case .prayer: "sun.max.fill"
@@ -103,4 +88,3 @@ enum Tab: String, CaseIterable {
         }
     }
 }
-

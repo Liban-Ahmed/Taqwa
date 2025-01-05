@@ -1,0 +1,29 @@
+{
+    "modules": [
+        {
+            "id": 1,
+            "title": "Introduction to Islam",
+            "description": "Learn the fundamentals of Islam",
+            "lessons": [
+                {
+                    "id": 1,
+                    "title": "The Five Pillars",
+                    "text": "The five pillars of Islam are the foundation of Muslim life. They are: Shahada (Declaration of Faith), Salah (Prayer), Zakat (Charity), Sawm (Fasting), and Hajj (Pilgrimage).",
+                    "audioFileName": "five_pillars_audio",
+                    "quizQuestions": [
+                        {
+                            "id": 1,
+                            "question": "What are the five pillars of Islam?",
+                            "options": [
+                                "Prayer, Fasting, Charity, Hajj",
+                                "Shahada, Prayer, Zakat, Fasting, Hajj",
+                                "Prayer, Reading Quran, Charity, Fasting"
+                            ],
+                            "correctIndex": 1
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

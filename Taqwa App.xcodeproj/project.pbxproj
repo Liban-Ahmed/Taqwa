@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		DE1976442D230F4B004977AE /* Adhan in Frameworks */ = {isa = PBXBuildFile; productRef = DE1976432D230F4B004977AE /* Adhan */; };
 		DE223FD72D2455CA00A26E59 /* Swift..gitignore in Resources */ = {isa = PBXBuildFile; fileRef = DE223FD62D2455C000A26E59 /* Swift..gitignore */; };
+		DEF73BAB2D2A2D78004E13AF /* Taqwa-App-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DEF73B912D2A2D78004E13AF /* Taqwa-App-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -33,6 +34,7 @@
 		DE1975E72D2305F7004977AE /* Taqwa AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Taqwa AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DE1975F12D2305F7004977AE /* Taqwa AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Taqwa AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DE223FD62D2455C000A26E59 /* Swift..gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = Swift..gitignore; sourceTree = "<group>"; };
+		DEF73B912D2A2D78004E13AF /* Taqwa-App-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Taqwa-App-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -88,6 +90,7 @@
 				DE1975F42D2305F7004977AE /* Taqwa AppUITests */,
 				DE1976422D230F47004977AE /* Frameworks */,
 				DE1975D62D2305F5004977AE /* Products */,
+				DEF73B912D2A2D78004E13AF /* Taqwa-App-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -232,6 +235,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DEF73BAB2D2A2D78004E13AF /* Taqwa-App-Info.plist in Resources */,
 				DE223FD72D2455CA00A26E59 /* Swift..gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
