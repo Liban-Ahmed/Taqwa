@@ -1,20 +1,19 @@
 import SwiftUI
 
 struct PrayerTimesListView: View {
-    let prayerTimes: [PrayerTime]
-    let currentPrayer: String
-    let currentTime: Date
-    let selectedDate: Date
+    @ObservedObject var viewModel: PrayerTimesViewModel
     
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
-                ForEach(prayerTimes) { prayer in
+                ForEach(viewModel.prayerTimes.indices, id: \.self) { index in
                     PrayerTimeRow(
-                        prayer: prayer,
-                        isCurrentPrayer: (prayer.name == currentPrayer && Calendar.current.isDateInToday(selectedDate)),
-                        isPastPrayer: isPastPrayer(prayer.time),
-                        isNextPrayer: isNextPrayer(prayer)
+                        prayer: $viewModel.prayerTimes[index],
+                        isCurrentPrayer: (viewModel.prayerTimes[index].name == viewModel.currentPrayer && Calendar.current.isDateInToday(viewModel.selectedDate)),
+                        isPastPrayer: isPastPrayer(viewModel.prayerTimes[index].time),
+                        isNextPrayer: isNextPrayer(viewModel.prayerTimes[index]),
+                        selectedDate: viewModel.selectedDate,
+                        savePrayerState: { viewModel.savePrayerState(for: viewModel.prayerTimes[index]) }
                     )
                 }
             }
@@ -25,14 +24,14 @@ struct PrayerTimesListView: View {
     }
     
     private func isPastPrayer(_ prayerTime: Date) -> Bool {
-        let dayComparison = Calendar.current.compare(selectedDate, to: Date(), toGranularity: .day)
+        let dayComparison = Calendar.current.compare(viewModel.selectedDate, to: Date(), toGranularity: .day)
         switch dayComparison {
         case .orderedAscending:
             // The selected date is before today: all prayers are past
             return true
         case .orderedSame:
             // Same day: compare exact time
-            return prayerTime < currentTime
+            return prayerTime < Date()
         case .orderedDescending:
             // Future day: none are past
             return false
@@ -40,68 +39,105 @@ struct PrayerTimesListView: View {
     }
     
     private func isNextPrayer(_ prayer: PrayerTime) -> Bool {
-        guard Calendar.current.isDateInToday(selectedDate) else {
+        guard Calendar.current.isDateInToday(viewModel.selectedDate) else {
             return false
         }
-        guard let nextIndex = prayerTimes.firstIndex(where: { !isPastPrayer($0.time) }) else {
+        guard let nextIndex = viewModel.prayerTimes.firstIndex(where: { !isPastPrayer($0.time) }) else {
             return false
         }
-        return prayerTimes[nextIndex].name == prayer.name
+        return viewModel.prayerTimes[nextIndex].name == prayer.name
     }
 }
 
 struct PrayerTimeRow: View {
-    let prayer: PrayerTime
+    @Binding var prayer: PrayerTime
     let isCurrentPrayer: Bool
     let isPastPrayer: Bool
     let isNextPrayer: Bool
+    let selectedDate: Date
+    let savePrayerState: () -> Void
     @Environment(\.colorScheme) private var colorScheme
     
-    private let hapticFeedback = UIImpactFeedbackGenerator(style: .light)
+    private let hapticFeedback = UIImpactFeedbackGenerator(style: .heavy)
+    
+    private var userDefaultsKey: String {
+        return "\(selectedDate)-\(prayer.name)"
+    }
     
     var body: some View {
-        HStack {
-            Text(prayer.name)
-                .font(.system(size: 17, weight: getTextWeight()))
-                .foregroundColor(getTextColor())
-                .dynamicTypeSize(.large)
-            
-            Spacer()
-            
-            Text(prayer.time, formatter: PrayerTimeRow.timeFormatter)
-                .font(.system(size: 17))
-                .foregroundColor(getTimeColor())
-                .dynamicTypeSize(.large)
-            
-            Image(systemName: "bell.fill")
-                .font(.system(size: 14))
-                .foregroundColor(getBellColor())
-                .padding(.leading, 12)
-                .opacity(isPastPrayer ? 0.5 : 1.0)
-                .onTapGesture {
-                    hapticFeedback.impactOccurred()
-                }
+        Button(action: {
+            hapticFeedback.impactOccurred()
+            prayer.status = prayer.status.nextStatus()
+            savePrayerStatus()
+            savePrayerState()
+            print("Tapped \(prayer.name), new status: \(prayer.status.rawValue)")
+        }) {
+            HStack {
+                // Circle with checkmark or other icon based on prayer status
+                Image(systemName: prayer.status.iconName)
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(prayer.status.iconColor)
+                    .frame(width: 24, height: 24)
+                    .background(Circle().fill(prayer.status.backgroundColor))
+                
+                Text(prayer.name)
+                    .font(.system(size: 17, weight: getTextWeight()))
+                    .foregroundColor(getTextColor())
+                    .dynamicTypeSize(.large)
+                
+                Spacer()
+                
+                Text(prayer.time, formatter: PrayerTimeRow.timeFormatter)
+                    .font(.system(size: 17))
+                    .foregroundColor(getTimeColor())
+                    .dynamicTypeSize(.large)
+                
+                Image(systemName: "bell.fill")
+                    .font(.system(size: 14))
+                    .foregroundColor(getBellColor())
+                    .padding(.leading, 12)
+                    .opacity(isPastPrayer ? 0.5 : 1.0)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(getBackgroundColor())
+                    .shadow(
+                        color: getShadowColor(),
+                        radius: isCurrentPrayer || isNextPrayer ? 4 : 2,
+                        x: 0,
+                        y: colorScheme == .dark ? -1 : 1
+                    )
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(
+                        isCurrentPrayer ? Color.blue.opacity(colorScheme == .dark ? 0.4 : 0.2) : Color.clear,
+                        lineWidth: 1
+                    )
+            )
+            .animation(.easeInOut(duration: 0.2), value: isCurrentPrayer)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(getBackgroundColor())
-                .shadow(
-                    color: getShadowColor(),
-                    radius: isCurrentPrayer || isNextPrayer ? 4 : 2,
-                    x: 0,
-                    y: colorScheme == .dark ? -1 : 1
-                )
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(
-                    isCurrentPrayer ? Color.blue.opacity(colorScheme == .dark ? 0.4 : 0.2) : Color.clear,
-                    lineWidth: 1
-                )
-        )
-        .animation(.easeInOut(duration: 0.2), value: isCurrentPrayer)
+        .buttonStyle(PlainButtonStyle())
+        .onAppear {
+            loadPrayerStatus()
+        }
+    }
+    
+    private func savePrayerStatus() {
+        UserDefaults.standard.set(prayer.status.rawValue, forKey: userDefaultsKey)
+        print("Saved \(prayer.name) status: \(prayer.status.rawValue) for date: \(selectedDate)")
+    }
+    
+    private func loadPrayerStatus() {
+        if let savedStatus = UserDefaults.standard.string(forKey: userDefaultsKey),
+           let status = PrayerStatus(rawValue: savedStatus) {
+            prayer.status = status
+            print("Loaded \(prayer.name) status: \(status.rawValue) for date: \(selectedDate)")
+        } else {
+            print("No saved status for \(prayer.name) on date: \(selectedDate)")
+        }
     }
     
     private func getTextWeight() -> Font.Weight {

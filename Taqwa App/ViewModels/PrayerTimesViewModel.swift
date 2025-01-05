@@ -1,9 +1,3 @@
-//
-//  PrayerTimesViewModel.swift
-//  Taqwa App
-//
-//  Created by Liban Ahmed on 12/30/24.
-//
 import Foundation
 import Adhan
 import CoreLocation
@@ -48,6 +42,9 @@ class PrayerTimesViewModel: ObservableObject {
                     self.prayerTimes = prayerTimesForDay.times
                     self.locationName = locationName
                     self.hijriDate = IslamicDateConverter.convertToHijri(date: date) // Update Hijri date
+
+                    // load prayer states from user defaults
+                    self.loadPrayerStates()
                 }
             }
         }
@@ -62,6 +59,12 @@ class PrayerTimesViewModel: ObservableObject {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             self?.updateCurrentAndNextPrayer(prayerTimes: prayerTimes)
         }
+    }
+    
+    func savePrayerState(for prayer: PrayerTime) {
+        let key = "\(selectedDate)-\(prayer.name)"
+        UserDefaults.standard.set(prayer.status.rawValue, forKey: key)
+        print("Saved \(prayer.name) status: \(prayer.status.rawValue) for date: \(selectedDate)")
     }
     
     private func updateCurrentAndNextPrayer(prayerTimes: [PrayerTime]) {
@@ -154,6 +157,19 @@ class PrayerTimesViewModel: ObservableObject {
                 self.currentPrayer = currentPrayer
                 self.timeRemaining = timeRemaining
                 self.progress = progress
+            }
+        }
+    }
+    
+    func loadPrayerStates() {
+        for index in prayerTimes.indices {
+            let key = "\(selectedDate)-\(prayerTimes[index].name)"
+            if let savedStatus = UserDefaults.standard.string(forKey: key),
+               let status = PrayerStatus(rawValue: savedStatus) {
+                prayerTimes[index].status = status
+                print("Loaded \(prayerTimes[index].name) status: \(status.rawValue) for date: \(selectedDate)")
+            } else {
+                print("No saved status for \(prayerTimes[index].name) on date: \(selectedDate)")
             }
         }
     }

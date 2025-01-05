@@ -1,10 +1,3 @@
-//
-//  TrackerView.swift
-//  Taqwa App
-//
-//  Created by Liban Ahmed on 12/31/24.
-//
-// test comment
 import SwiftUI
 
 struct TrackerView: View {
@@ -33,14 +26,15 @@ struct TrackerView: View {
             )
             
             // Moved PrayerTimesListView
-            PrayerTimesListView(
-                prayerTimes: viewModel.prayerTimes,
-                currentPrayer: viewModel.currentPrayer,
-                currentTime: Date(),
-                selectedDate: viewModel.selectedDate
-            )
+            PrayerTimesListView(viewModel: viewModel)
             
+            // TrendView
+            // TrendView(viewModel: viewModel)
+
             Spacer()
+        }
+        .onAppear {
+            viewModel.fetchPrayerTimes(for: viewModel.selectedDate)
         }
     }
 }
