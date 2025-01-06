@@ -23,13 +23,26 @@ struct TrackerView: View {
                 }
             )
             
+            Spacer().frame(height: 20)
+
             // Moved PrayerTimesListView
             PrayerTimesListView(viewModel: viewModel)
             
             // TrendView
-            // TrendView(viewModel: viewModel)
-
-            Spacer()
+            TrendView(viewModel: viewModel)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        // Match prayer list background color or gradient
+                        .fill(Color(.systemBackground).opacity(0.05))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.primary.opacity(0.2), lineWidth: 1)
+                        )
+                )
+                .padding(.bottom, 8) // Place at bottom with some space
+            
         }
         .onAppear {
             viewModel.fetchPrayerTimes(for: viewModel.selectedDate)

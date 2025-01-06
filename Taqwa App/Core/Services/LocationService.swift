@@ -13,6 +13,8 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     private let locationManager = CLLocationManager()
     private var onLocationUpdate: ((CLLocation) -> Void)?
 
+    public private(set) var lastKnownLocation: CLLocation?
+
     override init() {
         super.init()
         locationManager.delegate = self
@@ -30,6 +32,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
+        lastKnownLocation = location // Store the location
         onLocationUpdate?(location)
         locationManager.stopUpdatingLocation() // Stop after getting location
     }

@@ -20,9 +20,34 @@ class PrayerTimesViewModel: ObservableObject {
     private var timer: Timer?
 
     // Use day-only for stable keys
-    private func dayKey(for date: Date) -> String {
+    internal func dayKey(for date: Date) -> String {
         let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
         return "\(components.year!)-\(components.month!)-\(components.day!)"
+    }
+
+    public func prayerTimesForDate(_ date: Date) -> [PrayerTime] {
+        guard let location = locationManager.lastKnownLocation else {
+            return []
+        }
+        
+        let prayerTimesForDay = prayerCalculationService.getPrayerTimes(
+            location: (location.coordinate.latitude, location.coordinate.longitude),
+            date: date
+        )
+        
+        var dailyTimes = prayerTimesForDay.times
+        
+        // Load persisted statuses
+        let baseKey = dayKey(for: date)
+        for i in dailyTimes.indices {
+            let prayerName = dailyTimes[i].name
+            let key = "\(baseKey)-\(prayerName)"
+            if let savedStatus = UserDefaults.standard.string(forKey: key),
+               let status = PrayerStatus(rawValue: savedStatus) {
+                dailyTimes[i].status = status
+            }
+        }
+        return dailyTimes
     }
     
     func fetchPrayerTimes(for date: Date) {
