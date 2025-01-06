@@ -9,10 +9,10 @@
 			<string></string>
 			<key>LSHandlerRank</key>
 			<string>Default</string>
-			<key>NSLocationWhenInUseUsageDescription</key>
-			<string>We need your location to calculate prayer times.</string>
 			<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 			<string> We need your location to calculate prayer times.</string>
+			<key>NSLocationWhenInUseUsageDescription</key>
+			<string>We need your location to calculate prayer times.</string>
 		</dict>
 	</array>
 </dict>
