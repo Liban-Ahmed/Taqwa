@@ -5,12 +5,6 @@ struct TrackerView: View {
     
     var body: some View {
         VStack {
-            // Existing title
-            Text("Tracker View")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .padding()
-            
             // Updated DateSelectorView with onToday
             DateSelectorView(
                 selectedDate: viewModel.selectedDate,

@@ -29,9 +29,9 @@ struct DateSelectorView: View {
                 onToday()
             }) {
                 Text("Today")
-                    .font(.system(size: 16, weight: .semibold))
-                    .padding(.vertical, 6)
-                    .padding(.horizontal, 12)
+                    .font(.system(size: 12, weight: .semibold))
+                    .padding(.vertical, 4)
+                    .padding(.horizontal, 10)
                     .background(Color.clear)
                     .foregroundColor(.blue)
                     .cornerRadius(6)
@@ -39,8 +39,9 @@ struct DateSelectorView: View {
                         RoundedRectangle(cornerRadius: 6)
                             .stroke(Color.blue, lineWidth: 1)
                     )
+            }
         }
-        }
+        .padding(.top, 8)
         HStack {
             // Previous Date Button
             DateNavigationButton(
