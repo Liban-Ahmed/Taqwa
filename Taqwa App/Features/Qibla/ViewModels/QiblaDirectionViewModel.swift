@@ -24,15 +24,18 @@ class QiblaDirectionViewModel: NSObject, ObservableObject, CLLocationManagerDele
     // MARK: - Private Properties
     private let locationManager = CLLocationManager()
     private let motionManager = CMMotionManager()
-    private var headingOffset: Double = 0.0
+    
+    /// Stores heading in a continuous manner, can go beyond 0-360 to avoid sudden flips.
+    private var internalHeading: Double = 0.0
+    
     private var lastQiblaUpdate: Date?
     private let updateInterval: TimeInterval = 1.0
     
     // Cache properties
     private var lastGeocodedLocation: CLLocation?
     private var lastGeocodeTime: Date?
-    private let minimumLocationDistance: CLLocationDistance = 100 // Reduced for better accuracy
-    private let geocodeInterval: TimeInterval = 30 // Reduced for more frequent updates
+    private let minimumLocationDistance: CLLocationDistance = 100
+    private let geocodeInterval: TimeInterval = 30
     
     // Constants
     private let MAKKAH_LATITUDE = 21.4225
@@ -41,6 +44,9 @@ class QiblaDirectionViewModel: NSObject, ObservableObject, CLLocationManagerDele
     enum LocationAccuracy {
         case low, medium, high
     }
+    
+    // Heading offset for device orientation corrections
+    private var headingOffset: Double = 0.0
     
     // MARK: - Initialization
     override init() {
@@ -54,7 +60,7 @@ class QiblaDirectionViewModel: NSObject, ObservableObject, CLLocationManagerDele
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         locationManager.distanceFilter = 10 // Update every 10 meters
-        locationManager.headingFilter = 2 // Update every 2 degrees
+        locationManager.headingFilter = 2   // Update every 2 degrees
         locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
         locationManager.startUpdatingHeading()
@@ -107,9 +113,35 @@ class QiblaDirectionViewModel: NSObject, ObservableObject, CLLocationManagerDele
         
         calibrationRequired = false
         
-        // Smooth heading updates
+        // Adjust for device orientation
+        let rawHeading = newHeading.magneticHeading + headingOffset
+        
+        // Update continuously and smoothly
         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-            deviceHeading = newHeading.magneticHeading + headingOffset
+            updateHeadingContinuously(rawHeading)
+        }
+    }
+    
+    /// Ensures device heading updates smoothly without abrupt flips around 0°/360°.
+    private func updateHeadingContinuously(_ newHeading: Double) {
+        // Diff in [–180, 180]
+        let diff = (newHeading - internalHeading).truncatingRemainder(dividingBy: 360)
+        
+        if diff > 180 {
+            // shorter to rotate backwards
+            internalHeading -= 360 - diff
+        } else if diff < -180 {
+            // shorter to rotate forward
+            internalHeading += 360 + diff
+        } else {
+            // normal small rotation
+            internalHeading += diff
+        }
+        
+        // Normalize the public heading to [0, 360)
+        deviceHeading = internalHeading.truncatingRemainder(dividingBy: 360)
+        if deviceHeading < 0 {
+            deviceHeading += 360
         }
     }
     
@@ -129,59 +161,66 @@ class QiblaDirectionViewModel: NSObject, ObservableObject, CLLocationManagerDele
             }
         }
     }
+    
     // MARK: - Device Orientation Updates
-        private func startDeviceOrientationUpdates() {
-            if motionManager.isDeviceMotionAvailable {
-                motionManager.deviceMotionUpdateInterval = 1.0 / 60.0
-                motionManager.startDeviceMotionUpdates(to: .main) { [weak self] (motion, error) in
-                    guard let motion = motion else { return }
-                    
-                    // Update heading offset based on device orientation
-                    if UIDevice.current.orientation.isPortrait {
-                        self?.headingOffset = 0
-                    } else if UIDevice.current.orientation.isLandscape {
-                        self?.headingOffset = UIDevice.current.orientation == .landscapeLeft ? -90 : 90
-                    }
+    private func startDeviceOrientationUpdates() {
+        if motionManager.isDeviceMotionAvailable {
+            motionManager.deviceMotionUpdateInterval = 1.0 / 60.0
+            motionManager.startDeviceMotionUpdates(to: .main) { [weak self] motion, error in
+                guard let self = self, let motion = motion else { return }
+                
+                // Update heading offset based on device orientation
+                switch UIDevice.current.orientation {
+                case .portrait:
+                    self.headingOffset = 0
+                case .landscapeLeft:
+                    self.headingOffset = -90
+                case .landscapeRight:
+                    self.headingOffset = 90
+                default:
+                    // Upside down or face up, etc. – handle as needed
+                    self.headingOffset = 0
                 }
+            }
+        }
+    }
+    
+    // MARK: - Location Name Updates
+    private func updateLocationNameIfNeeded(from location: CLLocation) {
+        // Check if we should update based on distance and time
+        if let lastLocation = lastGeocodedLocation,
+           let lastTime = lastGeocodeTime {
+            let distance = location.distance(from: lastLocation)
+            let timeSinceLastUpdate = -lastTime.timeIntervalSinceNow
+            
+            guard distance > minimumLocationDistance || timeSinceLastUpdate > geocodeInterval else {
+                return
             }
         }
         
-        // MARK: - Location Name Updates
-        private func updateLocationNameIfNeeded(from location: CLLocation) {
-            // Check if we should update based on distance and time
-            if let lastLocation = lastGeocodedLocation,
-               let lastTime = lastGeocodeTime {
-                let distance = location.distance(from: lastLocation)
-                let timeSinceLastUpdate = -lastTime.timeIntervalSinceNow
-                
-                guard distance > minimumLocationDistance || timeSinceLastUpdate > geocodeInterval else {
+        // Update location cache
+        lastGeocodedLocation = location
+        lastGeocodeTime = Date()
+        
+        // Perform reverse geocoding
+        let geocoder = CLGeocoder()
+        geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    self?.locationName = "Location Error: \(error.localizedDescription)"
                     return
                 }
-            }
-            
-            // Update location cache
-            lastGeocodedLocation = location
-            lastGeocodeTime = Date()
-            
-            // Perform reverse geocoding
-            let geocoder = CLGeocoder()
-            geocoder.reverseGeocodeLocation(location) { [weak self] (placemarks, error) in
-                DispatchQueue.main.async {
-                    if let error = error {
-                        self?.locationName = "Location Error: \(error.localizedDescription)"
-                        return
-                    }
-                    
-                    if let placemark = placemarks?.first {
-                        let city = placemark.locality ?? "Unknown City"
-                        let country = placemark.country ?? "Unknown Country"
-                        self?.locationName = "\(city), \(country)"
-                    } else {
-                        self?.locationName = "Unknown Location"
-                    }
+                
+                if let placemark = placemarks?.first {
+                    let city = placemark.locality ?? "Unknown City"
+                    let country = placemark.country ?? "Unknown Country"
+                    self?.locationName = "\(city), \(country)"
+                } else {
+                    self?.locationName = "Unknown Location"
                 }
             }
         }
+    }
     
     // MARK: - Calibration
     func startCalibration() {
@@ -197,5 +236,4 @@ class QiblaDirectionViewModel: NSObject, ObservableObject, CLLocationManagerDele
         locationManager.stopUpdatingHeading()
         motionManager.stopDeviceMotionUpdates()
     }
-    
 }
