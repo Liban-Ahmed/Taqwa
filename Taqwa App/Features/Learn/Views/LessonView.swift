@@ -107,10 +107,12 @@ struct LessonView: View {
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Button(action: { dismiss() }) {
+                Button(action: {
+                    dismiss() }) {
                     Image(systemName: "xmark")
                         .font(.system(size: 20, weight: .semibold))
                         .foregroundColor(.white)
+                    
                 }
                 
                 Spacer()
@@ -222,6 +224,7 @@ struct LessonView: View {
         )
         .ignoresSafeArea()
     }
+    
     
     // MARK: - Helper Methods
     
