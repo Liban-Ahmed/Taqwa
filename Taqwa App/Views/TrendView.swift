@@ -2,11 +2,21 @@ import SwiftUI
 
 struct TrendView: View {
     @ObservedObject var viewModel: PrayerTimesViewModel
-
-    private var nextSevenDays: [Date] {
-        let today = Date()
-        return (0..<7).compactMap {
-            Calendar.current.date(byAdding: .day, value: $0, to: today)
+    
+    /// Returns the array of Date objects for the current week,
+    /// always Monday (weekday = 2) through Sunday.
+    private var currentWeek: [Date] {
+        var calendar = Calendar.current
+        // Force Monday as first weekday
+        calendar.firstWeekday = 2
+        // Get Monday of this current week
+        var components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())
+        components.weekday = 2 // Monday
+        let mondayOfWeek = calendar.date(from: components) ?? Date()
+        
+        // Build an array of 7 days from Monday -> Sunday
+        return (0..<7).compactMap { offset in
+            calendar.date(byAdding: .day, value: offset, to: mondayOfWeek)
         }
     }
 
@@ -14,12 +24,14 @@ struct TrendView: View {
         VStack(spacing: 8) {
             // 7-day layout with circular progress for each day
             HStack(spacing: 20) {
-                ForEach(nextSevenDays, id: \.self) { day in
-                    // Load persisted prayer statuses for each day
+                ForEach(currentWeek, id: \.self) { day in
+                    // Load persisted prayer statuses
                     let dayTimes = viewModel.prayerTimesForDate(day)
                     let dayPrayedCount = dayTimes.filter { $0.status == .prayed }.count
                     let dayProgress = Double(dayPrayedCount) / 5.0
-                    let dayInitial = Calendar.current.shortWeekdaySymbols[Calendar.current.component(.weekday, from: day) - 1].prefix(1)
+                    let dayInitial = Calendar.current.shortWeekdaySymbols[
+                        Calendar.current.component(.weekday, from: day) - 1
+                    ].prefix(1)
                     let isToday = Calendar.current.isDateInToday(day)
 
                     ZStack {
