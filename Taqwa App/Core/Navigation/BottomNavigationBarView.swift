@@ -3,23 +3,12 @@ struct BottomNavigationBarView: View {
     @Binding var selectedTab: Tab
     @Namespace private var animation
     
-    private let tabBarHeight: CGFloat = 60
+    private let tabBarHeight: CGFloat = 49
     private let impactGenerator = UIImpactFeedbackGenerator(style: .light)
     
-    private let selectedGradient = LinearGradient(
-        colors: [
-            Color(red: 0.95, green: 0.75, blue: 0.45),
-            Color(red: 1.00, green: 0.88, blue: 0.60)
-        ],
-        startPoint: .top,
-        endPoint: .bottom
-    )
+    private let selectedGradient = Color.accentColor
     
-    private let unselectedGradient = LinearGradient(
-        colors: [Color.secondary, Color.secondary],
-        startPoint: .top,
-        endPoint: .bottom
-    )
+    private let unselectedGradient = Color.secondary.opacity(0.75)
     
     var body: some View {
         HStack(spacing: 0) {
@@ -41,7 +30,7 @@ struct BottomNavigationBarView: View {
         }) {
             VStack(spacing: 4) {
                 Image(systemName: tab.icon)
-                    .font(.system(size: 24))
+                    .font(.system(size: 22))
                     .symbolRenderingMode(.palette)
                     .foregroundStyle(isSelected ? selectedGradient : unselectedGradient)
                     .frame(height: 30)
@@ -54,11 +43,12 @@ struct BottomNavigationBarView: View {
             .frame(maxWidth: .infinity)
         }
         .buttonStyle(TabButtonStyle())
+        .accessibilityLabel("\(tab.title) Tab")
     }
     
     private func handleTabSelection(_ tab: Tab) {
             impactGenerator.impactOccurred()
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
                 selectedTab = tab
             }
         }
