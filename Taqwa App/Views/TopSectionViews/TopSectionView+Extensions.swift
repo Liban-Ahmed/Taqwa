@@ -13,7 +13,7 @@ extension TopSectionView {
             // Sun/Moon pinned top-right
             SunMoonIndicator(isDaytime: isDaytime)
                 .offset(x: 160, y: -90) // Hard-coded offset to top-right
-                .animation(.easeInOut(duration: 1))
+                .animation(_:.easeInOut(duration: 1))
         }
         .padding(.horizontal, 30)
     }
