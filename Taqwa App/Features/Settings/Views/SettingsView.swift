@@ -52,26 +52,61 @@ struct SettingsView: View {
                         VStack(spacing: 20) {
                             // Prayer Settings
                             settingsGroup("Prayer Calculation") {
-                                SettingsRow(icon: "clock.fill", iconColor: .blue) {
-                                    Picker("Calculation Method", selection: $calculationMethod) {
-                                        ForEach(calculationMethods, id: \.self) { method in
-                                            Text(method).tag(method)
+                                // Calculation Method
+                                SettingsRow(icon: "globe", iconColor: .blue) {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("Calculation Method")
+                                            .font(.system(size: 16, weight: .medium))
+                                        
+                                        Picker("", selection: $calculationMethod) {
+                                            ForEach(calculationMethods, id: \.self) { method in
+                                                Text(method)
+                                                    .tag(method)
+                                            }
                                         }
+                                        .pickerStyle(.menu)
+                                        .tint(.white)
+                                        
+                                        Text("Method used to calculate prayer times")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(.white.opacity(0.6))
                                     }
-                                    .pickerStyle(.menu)
                                 }
                                 
                                 Divider()
                                     .background(Color.white.opacity(0.1))
+                                    .padding(.vertical, 8)
                                 
-                                SettingsRow(icon: "book.fill", iconColor: .green) {
-                                    Picker("Madhab", selection: $madhab) {
-                                        ForEach(madhabs, id: \.self) { madhab in
-                                            Text(madhab).tag(madhab)
+                                // Madhab Selection
+                                SettingsRow(icon: "building.columns.fill", iconColor: .green) {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("Madhab")
+                                            .font(.system(size: 16, weight: .medium))
+                                        
+                                        Picker("", selection: $madhab) {
+                                            ForEach(madhabs, id: \.self) { madhab in
+                                                Text(madhab)
+                                                    .tag(madhab)
+                                            }
                                         }
+                                        .pickerStyle(.menu)
+                                        .tint(.white)
+                                        
+                                        Text("School of Islamic jurisprudence")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(.white.opacity(0.6))
                                     }
-                                    .pickerStyle(.menu)
                                 }
+                            }
+                            .onChange(of: calculationMethod) { newMethod in
+                                // Add haptic feedback
+                                let generator = UIImpactFeedbackGenerator(style: .light)
+                                generator.impactOccurred()
+                            }
+                            .onChange(of: madhab) { newMadhab in
+                                // Add haptic feedback
+                                let generator = UIImpactFeedbackGenerator(style: .light)
+                                generator.impactOccurred()
                             }
                             
                             // Notifications
