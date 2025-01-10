@@ -11,17 +11,42 @@ import CoreLocation
 // MARK: - Prayer Calculation Service
 public class PrayerCalculationService {
     public init() {}
-    
-    public func getPrayerTimes(location: (latitude: Double, longitude: Double), date: Date) -> PrayerTimesForDay {
-        let coordinates = Coordinates(latitude: location.latitude, longitude: location.longitude)
-        var params = CalculationMethod.northAmerica.params
-        params.madhab = .hanafi
-
-        let currentDateComponents = Calendar.current.dateComponents([.year, .month, .day], from: date)
+    private func getCalculationParameters() -> CalculationParameters {
+        // Get the stored calculation method
+        let methodName = UserDefaults.standard.string(forKey: "calculationMethod") ?? "North America"
         
-        guard let prayerTimes = PrayerTimes(coordinates: coordinates, date: currentDateComponents, calculationParameters: params) else {
-            fatalError("Failed to calculate prayer times")
+        // Convert string to Adhan calculation method
+        var params: CalculationParameters
+        switch methodName {
+            case "Muslim World League":
+                params = CalculationMethod.muslimWorldLeague.params
+            case "Egyptian":
+                params = CalculationMethod.egyptian.params
+            case "Umm Al-Qura":
+                params = CalculationMethod.ummAlQura.params
+            case "Dubai":
+                params = CalculationMethod.dubai.params
+            case "Kuwait":
+                params = CalculationMethod.kuwait.params
+            default:
+                params = CalculationMethod.northAmerica.params
         }
+        
+        // Set madhab
+        let madhabName = UserDefaults.standard.string(forKey: "madhab") ?? "Hanafi"
+        params.madhab = madhabName == "Shafi" ? .shafi : .hanafi
+        
+        return params
+    }
+    public func getPrayerTimes(location: (latitude: Double, longitude: Double), date: Date) -> PrayerTimesForDay {
+            let coordinates = Coordinates(latitude: location.latitude, longitude: location.longitude)
+            let params = getCalculationParameters()
+
+            let currentDateComponents = Calendar.current.dateComponents([.year, .month, .day], from: date)
+            
+            guard let prayerTimes = PrayerTimes(coordinates: coordinates, date: currentDateComponents, calculationParameters: params) else {
+                fatalError("Failed to calculate prayer times")
+            }
 
         let times = [
             PrayerTime(name: "Fajr", time: prayerTimes.fajr),
