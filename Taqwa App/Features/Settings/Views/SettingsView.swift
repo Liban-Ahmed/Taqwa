@@ -12,6 +12,10 @@ struct SettingsView: View {
     @AppStorage("notificationsEnabled") private var notificationsEnabled = true
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
+    @AppStorage("highContrastMode") private var highContrastMode = false
+    @AppStorage("hijriAdjustment") private var hijriAdjustment = 0
+    @AppStorage("adhanSound") private var adhanSound = "Default"
+    private let adhanSounds = ["Default", "Makkah", "Madinah", "Custom"]
     
     private let calculationMethods = [
         "North America",
@@ -21,6 +25,7 @@ struct SettingsView: View {
         "Dubai",
         "Kuwait"
     ]
+   
     
     private let madhabs = ["Hanafi", "Shafi"]
     
