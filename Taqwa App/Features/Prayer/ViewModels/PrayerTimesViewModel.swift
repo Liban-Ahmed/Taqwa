@@ -18,6 +18,26 @@ class PrayerTimesViewModel: ObservableObject {
     private let locationManager = LocationManager()
     private let geocoder = CLGeocoder()
     private var timer: Timer?
+    // Add observer for settings changes
+    private var settingsObserver: NSObjectProtocol?
+    
+    init() {
+        // Observe settings changes
+        settingsObserver = NotificationCenter.default.addObserver(
+            forName: UserDefaults.didChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.updatePrayerTimesForSelectedDate()
+        }
+    }
+    
+    deinit {
+        if let observer = settingsObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+
 
     // Use day-only for stable keys
     internal func dayKey(for date: Date) -> String {
