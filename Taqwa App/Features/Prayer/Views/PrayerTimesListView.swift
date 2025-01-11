@@ -106,38 +106,38 @@ struct PrayerTimeRow: View {
                     .dynamicTypeSize(.large)
                 
                 Menu {
-                    ForEach(NotificationOption.allCases, id: \.self) { option in
-                        Button(action: {
-                            prayer.notificationOption = option
-                            saveNotificationOption()
-                            scheduleNotification()
-                        }) {
-                            HStack {
-                                Image(systemName: option.icon)
-                                    .foregroundColor(option.color)
-                                VStack(alignment: .leading) {
-                                    Text(option.rawValue)
-                                    Text(option.description)
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                                Spacer()
-                                if prayer.notificationOption == option {
-                                    Image(systemName: "checkmark")
-                                        .foregroundColor(option.color)
+                                    ForEach(NotificationOption.allCases, id: \.self) { option in
+                                        Button(action: {
+                                            prayer.notificationOption = option // Update the state
+                                            withAnimation(.easeInOut(duration: 0.2)) {
+                                                saveNotificationOption() // Save the change
+                                            }
+                                        }) {
+                                            HStack {
+                                                Image(systemName: option.icon)
+                                                    .foregroundColor(option.color)
+                                                VStack(alignment: .leading) {
+                                                    Text(option.rawValue)
+                                                    Text(option.description)
+                                                        .font(.caption)
+                                                        .foregroundColor(.secondary)
+                                                }
+                                                Spacer()
+                                                if prayer.notificationOption == option {
+                                                    Image(systemName: "checkmark.circle.fill")
+                                                        .foregroundColor(option.color)
+                                                }
+                                            }
+                                        }
+                                    }
+                                } label: {
+                                    Image(systemName: prayer.notificationOption.icon)
+                                        .font(.system(size: 14))
+                                        .foregroundColor(prayer.notificationOption.color)
+                                        .padding(.leading, 12)
+                                        .opacity(isPastPrayer ? 0.5 : 1.0)
                                 }
                             }
-                        }
-                    }
-                } label: {
-                    Image(systemName: prayer.notificationOption.icon)
-                        .font(.system(size: 14))
-                        .foregroundColor(prayer.notificationOption.color)
-                        .padding(.leading, 12)
-                        .opacity(isPastPrayer ? 0.5 : 1.0)
-                }
-                            
-            }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
             .background(
@@ -159,11 +159,14 @@ struct PrayerTimeRow: View {
             )
             .animation(.easeInOut(duration: 0.2), value: isCurrentPrayer)
         }
+        
         .buttonStyle(PlainButtonStyle())
         .onAppear {
             loadPrayerStatus()
             loadNotificationOption()
+            
         }
+        
     }
     
     private func savePrayerStatus() {
@@ -303,10 +306,9 @@ struct PrayerTimeRow: View {
             }
         }
         
-        private func saveNotificationOption() {
-            Task { @MainActor in
-                UserDefaults.standard.set(prayer.notificationOption.rawValue, forKey: notificationKey)
-                scheduleNotification()
-            }
-        }
+    private func saveNotificationOption() {
+           UserDefaults.standard.set(prayer.notificationOption.rawValue, forKey: notificationKey)
+           scheduleNotification()
+       }
+    
 }
