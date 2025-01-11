@@ -72,6 +72,11 @@ struct PrayerTimeRow: View {
     private var userDefaultsKey: String {
         return "\(selectedDate)-\(prayer.name)"
     }
+    @State private var showNotificationOptions = false
+        
+    private var notificationKey: String {
+        return "\(selectedDate)-\(prayer.name)-notification"
+    }
     
     var body: some View {
         Button(action: {
@@ -79,7 +84,6 @@ struct PrayerTimeRow: View {
             prayer.status = prayer.status.nextStatus()
             savePrayerStatus()
             savePrayerState()
-            print("Tapped \(prayer.name), new status: \(prayer.status.rawValue)")
         }) {
             HStack {
                 // Circle with checkmark or other icon based on prayer status
@@ -101,11 +105,30 @@ struct PrayerTimeRow: View {
                     .foregroundColor(getTimeColor())
                     .dynamicTypeSize(.large)
                 
-                Image(systemName: "bell.fill")
-                    .font(.system(size: 14))
-                    .foregroundColor(getBellColor())
-                    .padding(.leading, 12)
-                    .opacity(isPastPrayer ? 0.5 : 1.0)
+                Menu {
+                                    ForEach(NotificationOption.allCases, id: \.self) { option in
+                                        Button(action: {
+                                            prayer.notificationOption = option
+                                            saveNotificationOption()
+                                            scheduleNotification()
+                                        }) {
+                                            HStack {
+                                                Image(systemName: option.icon)
+                                                Text(option.rawValue)
+                                                if prayer.notificationOption == option {
+                                                    Image(systemName: "checkmark")
+                                                }
+                                            }
+                                        }
+                                    }
+                                } label: {
+                                    Image(systemName: prayer.notificationOption.icon)
+                                        .font(.system(size: 14))
+                                        .foregroundColor(getBellColor())
+                                        .padding(.leading, 12)
+                                        .opacity(isPastPrayer ? 0.5 : 1.0)
+                                }
+                            
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
@@ -131,6 +154,7 @@ struct PrayerTimeRow: View {
         .buttonStyle(PlainButtonStyle())
         .onAppear {
             loadPrayerStatus()
+            loadNotificationOption()
         }
     }
     
@@ -218,4 +242,44 @@ struct PrayerTimeRow: View {
         formatter.dateFormat = "h:mm a"
         return formatter
     }()
+    private func saveNotificationOption() {
+            UserDefaults.standard.set(prayer.notificationOption.rawValue, forKey: notificationKey)
+        }
+        
+        private func loadNotificationOption() {
+            if let savedOption = UserDefaults.standard.string(forKey: notificationKey),
+               let option = NotificationOption(rawValue: savedOption) {
+                prayer.notificationOption = option
+            }
+        }
+        
+        private func scheduleNotification() {
+            let content = UNMutableNotificationContent()
+            content.title = "\(prayer.name) Prayer Time"
+            content.body = "It's time for \(prayer.name) prayer"
+            
+            switch prayer.notificationOption {
+            case .silent:
+                return // Don't schedule notification
+            case .notification:
+                content.sound = .default
+            case .adhan:
+                // Assuming you have adhan.mp3 in your bundle
+                if let soundPath = Bundle.main.path(forResource: "adhan", ofType: "mp3") {
+                    content.sound = UNNotificationSound(named: UNNotificationSoundName(rawValue: soundPath))
+                }
+            }
+            
+            let calendar = Calendar.current
+            let components = calendar.dateComponents([.hour, .minute], from: prayer.time)
+            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+            
+            let request = UNNotificationRequest(
+                identifier: "\(prayer.name)-\(calendar.startOfDay(for: prayer.time))",
+                content: content,
+                trigger: trigger
+            )
+            
+            UNUserNotificationCenter.current().add(request)
+        }
 }

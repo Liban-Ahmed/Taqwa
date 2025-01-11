@@ -13,6 +13,10 @@
 			<string> We need your location to calculate prayer times.</string>
 			<key>NSLocationWhenInUseUsageDescription</key>
 			<string>We need your location to calculate prayer times.</string>
+			<key>UIBackgroundModes</key>
+			<array>
+				<string>remote-notification</string>
+			</array>
 		</dict>
 	</array>
 </dict>

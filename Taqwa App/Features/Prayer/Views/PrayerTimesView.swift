@@ -10,6 +10,7 @@ struct PrayerTimesView: View {
     @StateObject private var viewModel = PrayerTimesViewModel()
     @State private var selectedTab: Tab = .prayer
     
+    
     var body: some View {
             NavigationStack {
                 ZStack {

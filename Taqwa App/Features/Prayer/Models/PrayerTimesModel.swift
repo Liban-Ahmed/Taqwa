@@ -16,6 +16,7 @@ public struct PrayerTime: Identifiable {
     public let name: String
     public let time: Date
     var status: PrayerStatus = .none
+    var notificationOption: NotificationOption = .notification 
     
     public init(name: String, time: Date) {
         self.name = name
