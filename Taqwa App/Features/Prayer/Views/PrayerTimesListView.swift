@@ -106,28 +106,36 @@ struct PrayerTimeRow: View {
                     .dynamicTypeSize(.large)
                 
                 Menu {
-                                    ForEach(NotificationOption.allCases, id: \.self) { option in
-                                        Button(action: {
-                                            prayer.notificationOption = option
-                                            saveNotificationOption()
-                                            scheduleNotification()
-                                        }) {
-                                            HStack {
-                                                Image(systemName: option.icon)
-                                                Text(option.rawValue)
-                                                if prayer.notificationOption == option {
-                                                    Image(systemName: "checkmark")
-                                                }
-                                            }
-                                        }
-                                    }
-                                } label: {
-                                    Image(systemName: prayer.notificationOption.icon)
-                                        .font(.system(size: 14))
-                                        .foregroundColor(getBellColor())
-                                        .padding(.leading, 12)
-                                        .opacity(isPastPrayer ? 0.5 : 1.0)
+                    ForEach(NotificationOption.allCases, id: \.self) { option in
+                        Button(action: {
+                            prayer.notificationOption = option
+                            saveNotificationOption()
+                            scheduleNotification()
+                        }) {
+                            HStack {
+                                Image(systemName: option.icon)
+                                    .foregroundColor(option.color)
+                                VStack(alignment: .leading) {
+                                    Text(option.rawValue)
+                                    Text(option.description)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
                                 }
+                                Spacer()
+                                if prayer.notificationOption == option {
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(option.color)
+                                }
+                            }
+                        }
+                    }
+                } label: {
+                    Image(systemName: prayer.notificationOption.icon)
+                        .font(.system(size: 14))
+                        .foregroundColor(prayer.notificationOption.color)
+                        .padding(.leading, 12)
+                        .opacity(isPastPrayer ? 0.5 : 1.0)
+                }
                             
             }
             .padding(.horizontal, 16)
@@ -160,16 +168,13 @@ struct PrayerTimeRow: View {
     
     private func savePrayerStatus() {
         UserDefaults.standard.set(prayer.status.rawValue, forKey: userDefaultsKey)
-        print("Saved \(prayer.name) status: \(prayer.status.rawValue) for date: \(selectedDate)")
     }
     
     private func loadPrayerStatus() {
         if let savedStatus = UserDefaults.standard.string(forKey: userDefaultsKey),
            let status = PrayerStatus(rawValue: savedStatus) {
             prayer.status = status
-            print("Loaded \(prayer.name) status: \(status.rawValue) for date: \(selectedDate)")
         } else {
-            print("No saved status for \(prayer.name) on date: \(selectedDate)")
         }
     }
     
@@ -242,44 +247,66 @@ struct PrayerTimeRow: View {
         formatter.dateFormat = "h:mm a"
         return formatter
     }()
-    private func saveNotificationOption() {
-            UserDefaults.standard.set(prayer.notificationOption.rawValue, forKey: notificationKey)
-        }
         
-        private func loadNotificationOption() {
-            if let savedOption = UserDefaults.standard.string(forKey: notificationKey),
-               let option = NotificationOption(rawValue: savedOption) {
-                prayer.notificationOption = option
-            }
+    private func loadNotificationOption() {
+        if let savedOption = UserDefaults.standard.string(forKey: notificationKey),
+           let option = NotificationOption(rawValue: savedOption) {
+            prayer.notificationOption = option
         }
+    }
         
-        private func scheduleNotification() {
-            let content = UNMutableNotificationContent()
-            content.title = "\(prayer.name) Prayer Time"
-            content.body = "It's time for \(prayer.name) prayer"
+    private func scheduleNotification() {
+            let identifier = "\(prayer.name)-\(Calendar.current.startOfDay(for: prayer.time))"
             
-            switch prayer.notificationOption {
-            case .silent:
-                return // Don't schedule notification
-            case .notification:
-                content.sound = .default
-            case .adhan:
-                // Assuming you have adhan.mp3 in your bundle
-                if let soundPath = Bundle.main.path(forResource: "adhan", ofType: "mp3") {
-                    content.sound = UNNotificationSound(named: UNNotificationSoundName(rawValue: soundPath))
+            Task { @MainActor in
+                // Remove existing notifications
+                await UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [identifier])
+                
+                // Don't schedule if silent
+                guard prayer.notificationOption != .silent else { return }
+                
+                let content = UNMutableNotificationContent()
+                content.title = "\(prayer.name) Prayer Time"
+                content.body = "It's time for \(prayer.name) prayer"
+                
+                // Set sound based on option
+                switch prayer.notificationOption {
+                case .silent:
+                    return
+                case .standard:
+                    content.sound = .default
+                case .adhan:
+                    if let soundPath = Bundle.main.path(forResource: "prayerCall", ofType: "mp3") {
+                        content.sound = UNNotificationSound(named: UNNotificationSoundName(rawValue: soundPath))
+                    } else {
+                        print("Warning: prayerCall.mp3 not found in bundle")
+                        content.sound = .default
+                    }
+                }
+                
+                let calendar = Calendar.current
+                let components = calendar.dateComponents([.hour, .minute], from: prayer.time)
+                let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+                
+                let request = UNNotificationRequest(
+                    identifier: identifier,
+                    content: content,
+                    trigger: trigger
+                )
+                
+                do {
+                    try await UNUserNotificationCenter.current().add(request)
+                    print("Successfully scheduled notification for \(self.prayer.name)")
+                } catch {
+                    print("Error scheduling notification: \(error.localizedDescription)")
                 }
             }
-            
-            let calendar = Calendar.current
-            let components = calendar.dateComponents([.hour, .minute], from: prayer.time)
-            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
-            
-            let request = UNNotificationRequest(
-                identifier: "\(prayer.name)-\(calendar.startOfDay(for: prayer.time))",
-                content: content,
-                trigger: trigger
-            )
-            
-            UNUserNotificationCenter.current().add(request)
+        }
+        
+        private func saveNotificationOption() {
+            Task { @MainActor in
+                UserDefaults.standard.set(prayer.notificationOption.rawValue, forKey: notificationKey)
+                scheduleNotification()
+            }
         }
 }

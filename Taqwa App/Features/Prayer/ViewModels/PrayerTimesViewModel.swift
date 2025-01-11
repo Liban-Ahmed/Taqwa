@@ -36,6 +36,19 @@ class PrayerTimesViewModel: ObservableObject {
         if let observer = settingsObserver {
             NotificationCenter.default.removeObserver(observer)
         }
+        
+        @MainActor
+           func updatePrayerTimesForSelectedDate() {
+               fetchPrayerTimes(for: selectedDate)
+           }
+           
+           @MainActor
+           func savePrayerState(for prayer: PrayerTime) {
+               let baseKey = dayKey(for: selectedDate)
+               let key = "\(baseKey)-\(prayer.name)"
+               UserDefaults.standard.set(prayer.status.rawValue, forKey: key)
+               UserDefaults.standard.synchronize()
+           }
     }
 
 
@@ -118,7 +131,6 @@ class PrayerTimesViewModel: ObservableObject {
         let key = "\(baseKey)-\(prayer.name)"
         UserDefaults.standard.set(prayer.status.rawValue, forKey: key)
         UserDefaults.standard.synchronize()
-        print("Saved \(prayer.name) status: \(prayer.status.rawValue) for date: \(baseKey)")
     }
 
     func loadPrayerStates() {
@@ -129,9 +141,7 @@ class PrayerTimesViewModel: ObservableObject {
             if let savedStatus = UserDefaults.standard.string(forKey: key),
                let status = PrayerStatus(rawValue: savedStatus) {
                 prayerTimes[index].status = status
-                print("Loaded \(prayerName) status: \(status.rawValue) for date: \(baseKey)")
             } else {
-                print("No saved status for \(prayerName) on date: \(baseKey)")
             }
         }
     }

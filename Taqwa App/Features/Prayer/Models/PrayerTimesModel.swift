@@ -9,6 +9,7 @@ import Foundation
 import Adhan // Import the Adhan library for prayer time calculations
 import CoreLocation
 import SwiftUI
+import UserNotifications
 
 // MARK: - Prayer Time Model
 public struct PrayerTime: Identifiable {
@@ -16,7 +17,7 @@ public struct PrayerTime: Identifiable {
     public let name: String
     public let time: Date
     var status: PrayerStatus = .none
-    var notificationOption: NotificationOption = .notification 
+    var notificationOption: NotificationOption = .standard
     
     public init(name: String, time: Date) {
         self.name = name
