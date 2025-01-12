@@ -295,8 +295,8 @@ struct PrayerTimeRow: View {
                 guard prayer.notificationOption != .silent else { return }
                 
                 let content = UNMutableNotificationContent()
-                content.title = "\(prayer.name) Prayer Time"
-                content.body = "It's time for \(prayer.name) prayer"
+                content.title = "\(prayer.name)"
+                content.body = "It's time for \(prayer.name)"
                 
                 // Set sound based on option
                 switch prayer.notificationOption {
