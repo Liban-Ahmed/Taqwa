@@ -7,6 +7,7 @@
 import UserNotifications
 
 class NotificationService {
+    // Singleton instance
     static let shared = NotificationService()
     
     func checkNotificationAuthorization() {
@@ -31,6 +32,26 @@ class NotificationService {
             } else if let error = error {
                 print("Notification authorization error: \(error.localizedDescription)")
             }
+        }
+    }
+}
+
+class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
+    static let shared = NotificationDelegate()
+
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        // Check the userInfo for our custom sound name
+        if let customSound = notification.request.content.userInfo["customSoundName"] as? String,
+           customSound == "azan2.mp3" {
+            // If you have an AVAudioPlayer service for the full-length Adhan, call it here
+            AdhanAudioService.shared.playAdhan()
+            completionHandler([.banner])
+        } else {
+            completionHandler([.banner, .sound])
         }
     }
 }

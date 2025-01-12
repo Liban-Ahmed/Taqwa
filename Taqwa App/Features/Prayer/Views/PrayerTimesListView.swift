@@ -135,6 +135,7 @@ struct PrayerTimeRow: View {
                                 Button(action: {
                                     withAnimation(.easeInOut(duration: 0.2)) {
                                         currentNotificationOption = option
+                                        sendTestNotification(for: option)
                                     }
                                 }) {
                                            HStack {
@@ -184,13 +185,12 @@ struct PrayerTimeRow: View {
         }
         
         .buttonStyle(PlainButtonStyle())
-        .onAppear {
-                   loadPrayerStatus()
-                   loadNotificationOption() // Load on appear
-               }
-               .onChange(of: prayer.notificationOption) { newValue in
-                   currentNotificationOption = newValue 
-               }
+        .onChange(of: currentNotificationOption) { newValue in
+            prayer.notificationOption = newValue
+            scheduleNotification()         // schedules the “real” prayer-time notification
+            saveNotificationOption(newValue)
+        }
+
         
     }
     
@@ -279,57 +279,84 @@ struct PrayerTimeRow: View {
     
         
     private func scheduleNotification() {
-            let identifier = "\(prayer.name)-\(Calendar.current.startOfDay(for: prayer.time))"
+        let identifier = "\(prayer.name)-\(Calendar.current.startOfDay(for: prayer.time))"
+        
+        Task { @MainActor in
+            await UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [identifier])
             
-            Task { @MainActor in
-                // Remove existing notifications
-                await UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [identifier])
-                
-                // Don't schedule if silent
-                guard prayer.notificationOption != .silent else { return }
-                
-                
-                let content = UNMutableNotificationContent()
-                content.title = "\(prayer.name)"
-                content.body = "It's time for \(prayer.name)"
-                
-                // Add time sensitive flag
-                content.interruptionLevel = .timeSensitive
-                
-                // Set sound based on option
-                switch prayer.notificationOption {
-                case .silent:
-                    return
-                case .standard:
-                    content.sound = .default
-                case .adhan:
-                    if let soundPath = Bundle.main.path(forResource: "prayerCall", ofType: "mp3") {
-                        content.sound = UNNotificationSound(named: UNNotificationSoundName(rawValue: soundPath))
-                    } else {
-                        print("Warning: prayerCall.mp3 not found in bundle")
-                        content.sound = .default
-                    }
-                }
-                
-                let calendar = Calendar.current
-                let components = calendar.dateComponents([.hour, .minute], from: prayer.time)
-                let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
-                
-                let request = UNNotificationRequest(
-                    identifier: identifier,
-                    content: content,
-                    trigger: trigger
-                )
-                
-                do {
-                    try await UNUserNotificationCenter.current().add(request)
-                    print("Successfully scheduled notification for \(self.prayer.name)")
-                } catch {
-                    print("Error scheduling notification: \(error.localizedDescription)")
-                }
+            guard prayer.notificationOption != .silent else { return }
+            
+            let content = UNMutableNotificationContent()
+            content.title = prayer.name
+            content.body = "It's time for \(prayer.name)"
+            content.interruptionLevel = .timeSensitive
+
+            switch prayer.notificationOption {
+            case .silent:
+                return
+            case .standard:
+                content.sound = .default
+            case .adhan:
+                content.sound = UNNotificationSound(named: .init("azan2.mp3"))
+                // Store the filename in userInfo for detection later
+                content.userInfo["customSoundName"] = "azan2.mp3"
+            }
+            
+            let components = Calendar.current.dateComponents([.hour, .minute], from: prayer.time)
+            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+            
+            let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+            do {
+                try await UNUserNotificationCenter.current().add(request)
+                print("Successfully scheduled notification for \(prayer.name)")
+            } catch {
+                print("Error scheduling notification: \(error.localizedDescription)")
             }
         }
-        
-    
-    
+    }
+    private func sendTestNotification(for option: NotificationOption) {
+        // 1. Create the content
+        let content = UNMutableNotificationContent()
+        content.title = "\(prayer.name)"
+        content.body = "This is an example notification for \(prayer.name)"
+        content.interruptionLevel = .timeSensitive
+        switch option {
+        case .silent:
+            content.body = "Silent option - no sound."
+            content.sound = nil
+        case .standard:
+            content.title = "\(prayer.name)"
+            content.body = "This is an example notification for \(prayer.name)"
+            content.sound = .default
+        case .adhan:
+            content.title = "\(prayer.name)"
+            content.body = "This is an example notification for \(prayer.name)"
+            content.sound = UNNotificationSound(named: UNNotificationSoundName("azan2.mp3"))
+            content.userInfo["customSoundName"] = "azan2.mp3"
+            if content.sound == nil {
+                print("⚠️ Failed to create sound object for azan2.mp3")
+                content.sound = .default
+            }
+        }
+
+        // 2. Make it time-sensitive if you wish
+        content.interruptionLevel = .timeSensitive
+
+        // 3. Trigger 3 seconds from now
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 2, repeats: false)
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request)
+
+        // 4. Create a unique identifier
+        let requestID = "test-\(option.rawValue)-\(UUID().uuidString)"
+
+        // 5. Schedule
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Error scheduling test notification:", error.localizedDescription)
+            } else {
+                print("Successfully scheduled test notification for \(option.rawValue).")
+            }
+        }
+    }
 }
