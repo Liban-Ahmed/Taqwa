@@ -78,32 +78,30 @@ struct PrayerTimeRow: View {
         return "\(selectedDate)-\(prayer.name)-notification"
     }
     // Initialize with prayer's notification option instead of .standard
-        @State private var currentNotificationOption: NotificationOption
-        
-        // Add initializer to set initial state
-        init(prayer: Binding<PrayerTime>, isCurrentPrayer: Bool, isPastPrayer: Bool, isNextPrayer: Bool, selectedDate: Date, savePrayerState: @escaping () -> Void) {
-            self._prayer = prayer
-            self.isCurrentPrayer = isCurrentPrayer
-            self.isPastPrayer = isPastPrayer
-            self.isNextPrayer = isNextPrayer
-            self.selectedDate = selectedDate
-            self.savePrayerState = savePrayerState
-            // Initialize with prayer's current notification option
-            self._currentNotificationOption = State(initialValue: prayer.wrappedValue.notificationOption)
-        }
-    private func saveNotificationOption() {
-            UserDefaults.standard.set(currentNotificationOption.rawValue, forKey: notificationKey)
-            UserDefaults.standard.synchronize() // Force synchronize
-            prayer.notificationOption = currentNotificationOption // Update model
-            scheduleNotification() // Update notification
-        }
+    @State private var currentNotificationOption: NotificationOption
+    
+    // Add initializer to set initial state
+    init(prayer: Binding<PrayerTime>, isCurrentPrayer: Bool, isPastPrayer: Bool, isNextPrayer: Bool, selectedDate: Date, savePrayerState: @escaping () -> Void) {
+        self._prayer = prayer
+        self.isCurrentPrayer = isCurrentPrayer
+        self.isPastPrayer = isPastPrayer
+        self.isNextPrayer = isNextPrayer
+        self.selectedDate = selectedDate
+        self.savePrayerState = savePrayerState
+        // Initialize with prayer's current notification option
+        self._currentNotificationOption = State(initialValue: prayer.wrappedValue.notificationOption)
+    }
+    private func saveNotificationOption(_ option: NotificationOption) {
+           UserDefaults.standard.set(option.rawValue, forKey: notificationKey)
+           // scheduleNotification() if needed
+       }
     private func loadNotificationOption() {
-            if let savedOption = UserDefaults.standard.string(forKey: notificationKey),
-               let option = NotificationOption(rawValue: savedOption) {
-                currentNotificationOption = option // Update local state
-                prayer.notificationOption = option // Update model
+        if let savedOption = UserDefaults.standard.string(forKey: notificationKey),
+                   let option = NotificationOption(rawValue: savedOption) {
+                    currentNotificationOption = option
+                    prayer.notificationOption = option
+                }
             }
-        }
     
     var body: some View {
         Button(action: {
@@ -137,8 +135,6 @@ struct PrayerTimeRow: View {
                                 Button(action: {
                                     withAnimation(.easeInOut(duration: 0.2)) {
                                         currentNotificationOption = option
-                                        prayer.notificationOption = option
-                                        saveNotificationOption() // Save when changed
                                     }
                                 }) {
                                            HStack {
@@ -191,11 +187,9 @@ struct PrayerTimeRow: View {
         .onAppear {
                    loadPrayerStatus()
                    loadNotificationOption() // Load on appear
-                   currentNotificationOption = prayer.notificationOption // Sync state
                }
                .onChange(of: prayer.notificationOption) { newValue in
-                   currentNotificationOption = newValue // Keep local state in sync
-                   saveNotificationOption() // Save when changed externally
+                   currentNotificationOption = newValue 
                }
         
     }
