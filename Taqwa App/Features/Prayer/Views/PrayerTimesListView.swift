@@ -294,9 +294,13 @@ struct PrayerTimeRow: View {
                 // Don't schedule if silent
                 guard prayer.notificationOption != .silent else { return }
                 
+                
                 let content = UNMutableNotificationContent()
                 content.title = "\(prayer.name)"
                 content.body = "It's time for \(prayer.name)"
+                
+                // Add time sensitive flag
+                content.interruptionLevel = .timeSensitive
                 
                 // Set sound based on option
                 switch prayer.notificationOption {
