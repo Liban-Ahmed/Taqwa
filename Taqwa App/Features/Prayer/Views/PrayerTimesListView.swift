@@ -77,15 +77,41 @@ struct PrayerTimeRow: View {
     private var notificationKey: String {
         return "\(selectedDate)-\(prayer.name)-notification"
     }
-    @State private var currentNotificationOption: NotificationOption = .standard // Add state tracking
+    // Initialize with prayer's notification option instead of .standard
+        @State private var currentNotificationOption: NotificationOption
+        
+        // Add initializer to set initial state
+        init(prayer: Binding<PrayerTime>, isCurrentPrayer: Bool, isPastPrayer: Bool, isNextPrayer: Bool, selectedDate: Date, savePrayerState: @escaping () -> Void) {
+            self._prayer = prayer
+            self.isCurrentPrayer = isCurrentPrayer
+            self.isPastPrayer = isPastPrayer
+            self.isNextPrayer = isNextPrayer
+            self.selectedDate = selectedDate
+            self.savePrayerState = savePrayerState
+            // Initialize with prayer's current notification option
+            self._currentNotificationOption = State(initialValue: prayer.wrappedValue.notificationOption)
+        }
+    private func saveNotificationOption() {
+            UserDefaults.standard.set(currentNotificationOption.rawValue, forKey: notificationKey)
+            UserDefaults.standard.synchronize() // Force synchronize
+            prayer.notificationOption = currentNotificationOption // Update model
+            scheduleNotification() // Update notification
+        }
+    private func loadNotificationOption() {
+            if let savedOption = UserDefaults.standard.string(forKey: notificationKey),
+               let option = NotificationOption(rawValue: savedOption) {
+                currentNotificationOption = option // Update local state
+                prayer.notificationOption = option // Update model
+            }
+        }
     
     var body: some View {
         Button(action: {
-            hapticFeedback.impactOccurred()
-            prayer.status = prayer.status.nextStatus()
-            savePrayerStatus()
-            savePrayerState()
-        }) {
+                    hapticFeedback.impactOccurred()
+                    prayer.status = prayer.status.nextStatus()
+                    savePrayerStatus()
+                    savePrayerState()
+                }) {
             HStack {
                 // Circle with checkmark or other icon based on prayer status
                 Image(systemName: prayer.status.iconName)
@@ -107,40 +133,39 @@ struct PrayerTimeRow: View {
                     .dynamicTypeSize(.large)
                 
                 Menu {
-                                    ForEach(NotificationOption.allCases, id: \.self) { option in
-                                        Button(action: {
-                                            withAnimation(.easeInOut(duration: 0.2)) {
-                                                currentNotificationOption = option // Update local state
-                                                prayer.notificationOption = option
-                                                saveNotificationOption()
-                                            }
-                                        }) {
-                                            HStack {
-                                                Image(systemName: option.icon)
-                                                    .foregroundColor(option.color)
-                                                VStack(alignment: .leading) {
-                                                    Text(option.rawValue)
-                                                    Text(option.description)
-                                                        .font(.caption)
-                                                        .foregroundColor(.secondary)
-                                                }
-                                                Spacer()
-                                                if currentNotificationOption == option {
-                                                    Image(systemName: "circle.inset.filled")
-                                                        .foregroundColor(option.color)
-                                                }
-                                            }
-                                        }
+                            ForEach(NotificationOption.allCases, id: \.self) { option in
+                                Button(action: {
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        currentNotificationOption = option
+                                        prayer.notificationOption = option
+                                        saveNotificationOption() // Save when changed
                                     }
-                                } label: {
-                                    Image(systemName: currentNotificationOption.icon)
-                                        .font(.system(size: 14))
-                                        .foregroundColor(currentNotificationOption.color)
-                                        .padding(.leading, 12)
-                                        .opacity(isPastPrayer ? 0.5 : 1.0)
-                                }
-                            }
-            .padding(.horizontal, 16)
+                                }) {
+                                           HStack {
+                                               Image(systemName: option.icon)
+                                                   .foregroundColor(option.color)
+                                               VStack(alignment: .leading) {
+                                                   Text(option.rawValue)
+                                                   Text(option.description)
+                                                       .font(.caption)
+                                                       .foregroundColor(.secondary)
+                                               }
+                                               Spacer()
+                                               if currentNotificationOption == option {
+                                                   Image(systemName: "circle.inset.filled")
+                                                       .foregroundColor(option.color)
+                                               }
+                                           }
+                                       }
+                                   }
+                               } label: {
+                                   Image(systemName: currentNotificationOption.icon)
+                                       .font(.system(size: 14))
+                                       .foregroundColor(currentNotificationOption.color)
+                                       .padding(.leading, 12)
+                                       .opacity(isPastPrayer ? 0.5 : 1.0)
+                               }
+                           }            .padding(.horizontal, 16)
             .padding(.vertical, 14)
             .background(
                 RoundedRectangle(cornerRadius: 12)
@@ -164,14 +189,14 @@ struct PrayerTimeRow: View {
         
         .buttonStyle(PlainButtonStyle())
         .onAppear {
-            loadPrayerStatus()
-            loadNotificationOption()
-            currentNotificationOption = prayer.notificationOption
-            
-        }
-        .onChange(of: prayer.notificationOption) { newValue in
-                currentNotificationOption = newValue // Keep local state in sync
-            }
+                   loadPrayerStatus()
+                   loadNotificationOption() // Load on appear
+                   currentNotificationOption = prayer.notificationOption // Sync state
+               }
+               .onChange(of: prayer.notificationOption) { newValue in
+                   currentNotificationOption = newValue // Keep local state in sync
+                   saveNotificationOption() // Save when changed externally
+               }
         
     }
     
@@ -257,13 +282,7 @@ struct PrayerTimeRow: View {
         return formatter
     }()
         
-    private func loadNotificationOption() {
-           if let savedOption = UserDefaults.standard.string(forKey: notificationKey),
-              let option = NotificationOption(rawValue: savedOption) {
-               currentNotificationOption = option // Update local state
-               prayer.notificationOption = option
-           }
-       }
+    
         
     private func scheduleNotification() {
             let identifier = "\(prayer.name)-\(Calendar.current.startOfDay(for: prayer.time))"
@@ -313,9 +332,6 @@ struct PrayerTimeRow: View {
             }
         }
         
-    private func saveNotificationOption() {
-           UserDefaults.standard.set(prayer.notificationOption.rawValue, forKey: notificationKey)
-           scheduleNotification()
-       }
+    
     
 }
