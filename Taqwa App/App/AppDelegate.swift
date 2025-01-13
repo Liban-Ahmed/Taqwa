@@ -39,13 +39,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
             // Request notification authorization
-            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-                if granted {
-                    print("Notification authorization granted")
-                } else if let error = error {
-                    print("Notification authorization error: \(error.localizedDescription)")
-                }
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge, .criticalAlert, .timeSensitive]) { granted, error in
+            if granted {
+                print("Notification authorization (including critical/time-sensitive) granted")
+            } else if let error = error {
+                print("Notification authorization error: \(error.localizedDescription)")
             }
+        }
             
             #if DEBUG
             runDebugTests()

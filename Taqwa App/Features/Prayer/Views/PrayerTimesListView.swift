@@ -317,9 +317,10 @@ struct PrayerTimeRow: View {
     private func sendTestNotification(for option: NotificationOption) {
         // 1. Create the content
         let content = UNMutableNotificationContent()
+        content.interruptionLevel = .timeSensitive
         content.title = "\(prayer.name)"
         content.body = "This is an example notification for \(prayer.name)"
-        content.interruptionLevel = .timeSensitive
+        
         switch option {
         case .silent:
             content.body = "Silent option - no sound."
@@ -359,4 +360,8 @@ struct PrayerTimeRow: View {
             }
         }
     }
+    private func clearScheduledNotifications() {
+    UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+    UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+}
 }
