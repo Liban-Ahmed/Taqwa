@@ -75,8 +75,9 @@ struct PrayerTimeRow: View {
     @State private var showNotificationOptions = false
         
     private var notificationKey: String {
-        return "\(selectedDate)-\(prayer.name)-notification"
+        return "\(prayer.name)-notification"
     }
+
     // Initialize with prayer's notification option instead of .standard
     @State private var currentNotificationOption: NotificationOption
     
@@ -91,17 +92,7 @@ struct PrayerTimeRow: View {
         // Initialize with prayer's current notification option
         self._currentNotificationOption = State(initialValue: prayer.wrappedValue.notificationOption)
     }
-    private func saveNotificationOption(_ option: NotificationOption) {
-           UserDefaults.standard.set(option.rawValue, forKey: notificationKey)
-           // scheduleNotification() if needed
-       }
-    private func loadNotificationOption() {
-        if let savedOption = UserDefaults.standard.string(forKey: notificationKey),
-                   let option = NotificationOption(rawValue: savedOption) {
-                    currentNotificationOption = option
-                    prayer.notificationOption = option
-                }
-            }
+   
     
     var body: some View {
         Button(action: {
@@ -185,6 +176,9 @@ struct PrayerTimeRow: View {
         }
         
         .buttonStyle(PlainButtonStyle())
+        .onAppear{
+            loadNotificationOption()
+        }
         .onChange(of: currentNotificationOption) { newValue in
             prayer.notificationOption = newValue
             scheduleNotification()         // schedules the “real” prayer-time notification
@@ -193,6 +187,17 @@ struct PrayerTimeRow: View {
 
         
     }
+    private func saveNotificationOption(_ option: NotificationOption) {
+           UserDefaults.standard.set(option.rawValue, forKey: notificationKey)
+           // scheduleNotification() if needed
+       }
+    private func loadNotificationOption() {
+            if let savedOption = UserDefaults.standard.string(forKey: notificationKey),
+               let option = NotificationOption(rawValue: savedOption) {
+                currentNotificationOption = option
+                prayer.notificationOption = option
+            }
+        }
     
     private func savePrayerStatus() {
         UserDefaults.standard.set(prayer.status.rawValue, forKey: userDefaultsKey)
