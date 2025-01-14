@@ -1,13 +1,10 @@
 import SwiftUI
 import Combine
 
-struct SmoothCompassView: View {
+struct CompassView: View {
     // MARK: - External Inputs
-    /// The *immediate* device heading you get from your view model.
     let deviceHeading: Double
-    /// The *immediate* Qibla bearing you get from your view model.
     let qiblaBearing: Double
-    /// Whether the user is currently aligned within some threshold.
     let isAligned: Bool
     
     // MARK: - Internal Smoothed States
@@ -15,18 +12,15 @@ struct SmoothCompassView: View {
     @State private var displayedQiblaBearing: Double = 0.0
     
     // MARK: - Timer & Smoothing
-    /// We’ll drive a smooth update using a timer that fires ~60 times per second.
     @State private var smoothingTimer: Timer?
-    /// Factor controlling how quickly we approach the target. 0.1 = move 10% each frame.
-    private let lerpFactor = 0.9
+    private let lerpFactor = 0.9 // how quickly angles move toward target each frame
     
-    // MARK: - Configuration
-    private let cardinalAngles: [Double] = [0, 90, 180, 270]
-    private let secondaryAngles: [Double] = [45, 135, 225, 315]
-    private let tickMarks: [Double] = Array(stride(from: 0, through: 350, by: 10))
+    // MARK: - Colors
+    /// Base color for the arc and diamond (green in your screenshots).
+    private let baseColor = Color.green
     
-    private let alignedColor = Color(red: 0.3, green: 0.8, blue: 0.4)
-    private let normalColor = Color.white
+    /// The partial arc thickness as a fraction of the view size.
+    private let arcThicknessFactor: CGFloat = 0.07
     
     // MARK: - Body
     var body: some View {
@@ -34,146 +28,120 @@ struct SmoothCompassView: View {
             let size = min(geo.size.width, geo.size.height)
             
             ZStack {
-                // Background Rings
-                Circle()
-                    .strokeBorder(Color.white.opacity(0.2), lineWidth: size * 0.01)
-                
-                Circle()
-                    .strokeBorder(Color.white.opacity(0.15), lineWidth: size * 0.005)
-                    .frame(width: size * 0.85, height: size * 0.85)
-                
-                // Compass Ticks & Labels (rotated by smoothed displayedDeviceHeading)
-                compassMarks(size: size)
-                    .rotationEffect(.degrees(-displayedDeviceHeading))
-                
-                // Qibla Pointer (rotated by difference between displayedQiblaBearing & displayedDeviceHeading)
-                qiblaPointer(size: size)
-                    .rotationEffect(.degrees(displayedQiblaBearing - displayedDeviceHeading))
-                
-                // Center Dot
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            gradient: Gradient(colors: [
-                                isAligned ? alignedColor : normalColor,
-                                (isAligned ? alignedColor : normalColor).opacity(0.1)
-                            ]),
-                            center: .center,
-                            startRadius: 0,
-                            endRadius: size * 0.05
+                // 1) Partial Arc
+                PartialArcShape(startFraction: 0.25, endFraction: 0.85)
+                    .stroke(
+                        baseColor,
+                        style: StrokeStyle(
+                            lineWidth: size * arcThicknessFactor,
+                            lineCap: .round
                         )
                     )
-                    .frame(width: size * 0.07, height: size * 0.07)
-                    .shadow(color: isAligned ? alignedColor : normalColor, radius: size * 0.02)
+                    .frame(width: size, height: size)
+                    .rotationEffect(.degrees(-90)) // so arc sits “on top” like the screenshots
+                
+                // 2) Center Diamond
+                DiamondShape()
+                    .fill(baseColor)
+                    .frame(width: size * 0.4, height: size * 0.4)
+                    .rotationEffect(.degrees(displayedQiblaBearing - displayedDeviceHeading))
+                    .shadow(
+                        color: baseColor.opacity(isAligned ? 1.0 : 0.0),
+                        radius: isAligned ? size * 0.07 : 0
+                    )
+                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isAligned)
             }
             .frame(width: size, height: size)
         }
         .onAppear {
-            // Initialize displayed headings
+            // Initialize displayed angles
             displayedDeviceHeading = deviceHeading
             displayedQiblaBearing = qiblaBearing
-            
-            // Start smoothing timer
             startSmoothingTimer()
         }
         .onDisappear {
-            // Stop the timer to avoid resource consumption
             stopSmoothingTimer()
         }
-        .onChange(of: deviceHeading) { _ in
-            // We only update the target; the timer handles smoothing
-        }
-        .onChange(of: qiblaBearing) { _ in
-            // Same as above
-        }
+        // Whenever deviceHeading or qiblaBearing change, we let the timer smooth them out
+        .onChange(of: deviceHeading) { _ in }
+        .onChange(of: qiblaBearing) { _ in }
     }
 }
 
-// MARK: - Subviews
-extension SmoothCompassView {
-    private func compassMarks(size: CGFloat) -> some View {
-        ZStack {
-            // Tick Marks
-            ForEach(tickMarks, id: \.self) { angle in
-                Rectangle()
-                    .fill(Color.white.opacity(0.1))
-                    .frame(
-                        width: angle.truncatingRemainder(dividingBy: 30) == 0 ? 2 : 1,
-                        height: angle.truncatingRemainder(dividingBy: 30) == 0 ? size * 0.08 : size * 0.05
-                    )
-                    .offset(y: -size * 0.45)
-                    .rotationEffect(.degrees(angle))
-                    .accessibilityHidden(true)
-            }
-            
-            // Primary Cardinal Points
-            ForEach(cardinalAngles, id: \.self) { angle in
-                Text(cardinalPoint(for: angle))
-                    .font(.system(size: size * 0.06, weight: .semibold))
-                    .foregroundColor(Color.white.opacity(0.8))
-                    .offset(y: -size * 0.45)
-                    .rotationEffect(.degrees(angle))
-                    .accessibilityLabel(cardinalPoint(for: angle))
-            }
-            
-            // Secondary Directions (NE, SE, SW, NW)
-            ForEach(secondaryAngles, id: \.self) { angle in
-                Text(cardinalPoint(for: angle))
-                    .font(.system(size: size * 0.04, weight: .medium))
-                    .foregroundColor(Color.white.opacity(0.5))
-                    .offset(y: -size * 0.45)
-                    .rotationEffect(.degrees(angle))
-                    .accessibilityLabel(cardinalPoint(for: angle))
-            }
-        }
-    }
+// MARK: - Partial Arc Shape
+/**
+ Draws an arc of a circle from `startFraction` to `endFraction` of the full 360°.
+ 
+ - Parameters:
+   - startFraction: the fraction of the circle at which to start (0.0 -> 1.0)
+   - endFraction: the fraction of the circle at which to end (0.0 -> 1.0)
+ */
+struct PartialArcShape: Shape {
+    let startFraction: CGFloat
+    let endFraction: CGFloat
     
-    private func qiblaPointer(size: CGFloat) -> some View {
-        VStack(spacing: 0) {
-            Image(systemName: "location.north.line.fill")
-                .resizable()
-                .scaledToFit()
-                .frame(width: size * 0.1, height: size * 0.1)
-                .foregroundColor(isAligned ? alignedColor : normalColor)
-                .shadow(color: isAligned ? alignedColor : normalColor, radius: size * 0.01)
-            
-            Rectangle()
-                .fill(isAligned ? alignedColor : normalColor)
-                .frame(width: size * 0.007, height: size * 0.35)
-        }
-        .accessibilityLabel("Qibla direction")
-        .accessibilityValue(isAligned ? "Aligned" : "Not aligned")
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        
+        path.addArc(
+            center: CGPoint(x: rect.midX, y: rect.midY),
+            radius: rect.width / 2,
+            startAngle: .degrees(360 * startFraction),
+            endAngle: .degrees(360 * endFraction),
+            clockwise: false
+        )
+        
+        return path
+    }
+}
+
+// MARK: - Diamond Shape
+/**
+ A simple diamond: basically a square rotated 45° so that it “points” upward/downward.
+ */
+struct DiamondShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        let w = rect.width
+        let h = rect.height
+        
+        var path = Path()
+        // Move to top center
+        path.move(to: CGPoint(x: w / 2, y: 0))
+        // Right center
+        path.addLine(to: CGPoint(x: w, y: h / 2))
+        // Bottom center
+        path.addLine(to: CGPoint(x: w / 2, y: h))
+        // Left center
+        path.addLine(to: CGPoint(x: 0, y: h / 2))
+        // Close path back to top center
+        path.closeSubpath()
+        
+        return path
     }
 }
 
 // MARK: - Timer-based Smoothing
-extension SmoothCompassView {
-    /// Create and start a 60 Hz timer that updates heading values incrementally toward the target.
+extension CompassView {
     private func startSmoothingTimer() {
         stopSmoothingTimer()
         
-        let interval = 1.0 / 60.0  // 60 FPS
+        let interval = 1.0 / 60.0  // ~60 FPS
         smoothingTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { _ in
             updateDisplayedHeadings()
         }
     }
     
-    /// Invalidate the timer when the view disappears or when no longer needed.
     private func stopSmoothingTimer() {
         smoothingTimer?.invalidate()
         smoothingTimer = nil
     }
     
-    /// Each tick, move `displayedHeading` closer to `deviceHeading` by `lerpFactor`.
     private func updateDisplayedHeadings() {
-        // Move device heading
         displayedDeviceHeading = lerpAngle(
             current: displayedDeviceHeading,
             target: deviceHeading,
             factor: lerpFactor
         )
-        
-        // Move Qibla heading
         displayedQiblaBearing = lerpAngle(
             current: displayedQiblaBearing,
             target: qiblaBearing,
@@ -181,46 +149,19 @@ extension SmoothCompassView {
         )
     }
     
-    /**
-     Linearly interpolates angle in a minimal arc.
-     - parameters:
-       - current: current angle (0...360)
-       - target: target angle (0...360)
-       - factor: fraction [0...1] to move each step
-     - returns: new smoothed angle
-    */
+    /// Smooth angle interpolation, preserving minimal arcs in [−180, +180].
     private func lerpAngle(current: Double, target: Double, factor: Double) -> Double {
-        // 1) Find minimal difference in range [−180, 180]
         var diff = (target - current).truncatingRemainder(dividingBy: 360)
         if diff > 180  { diff -= 360 }
         if diff < -180 { diff += 360 }
         
-        // 2) Move a fraction 'factor' of diff
         let newAngle = current + diff * factor
         
-        // 3) Normalize [0, 360)
         var normalized = newAngle.truncatingRemainder(dividingBy: 360)
         if normalized < 0 {
             normalized += 360
         }
         
         return normalized
-    }
-}
-
-// MARK: - Helpers
-extension SmoothCompassView {
-    private func cardinalPoint(for angle: Double) -> String {
-        switch angle {
-        case 0: return "N"
-        case 45: return "NE"
-        case 90: return "E"
-        case 135: return "SE"
-        case 180: return "S"
-        case 225: return "SW"
-        case 270: return "W"
-        case 315: return "NW"
-        default: return ""
-        }
     }
 }

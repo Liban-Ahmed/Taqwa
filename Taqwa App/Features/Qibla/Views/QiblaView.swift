@@ -10,237 +10,119 @@ import CoreLocation
 import Combine
 
 struct QiblaView: View {
-    // Observed/StateObject ensures the view model lives as long as this view hierarchy
     @StateObject private var viewModel = QiblaDirectionViewModel()
     
-    // Environment
-    @Environment(\.dismiss) private var dismiss
+    // Track scenePhase if you want to stop/resume updates
     @Environment(\.scenePhase) private var scenePhase
     
-    // Haptic feedback generator
+    // If you want a haptic tap when user gets within certain alignment
     private let hapticFeedback = UIImpactFeedbackGenerator(style: .medium)
-    
-    // Alignment threshold (could also live in your QiblaDirectionViewModel)
     private let alignmentThreshold: Double = 8.0
     
-    // Compass dimension
-    private let compassSize: CGFloat = 300
-    
-    // MARK: - Body
     var body: some View {
+        
+        // 1) Decide background color: dark or green?
+        //    If user is “close enough” to Qibla, you might show green, else dark.
+        let isClose = abs(viewModel.relativeAngle) < alignmentThreshold
+        let backgroundColor = isClose ? Color.green : Color.black
+        
         ZStack {
-            backgroundGradient
+            backgroundColor
                 .ignoresSafeArea()
             
-            VStack(spacing: 20) {
-                headerView
+            VStack {
+                // 2) Top bar / location label
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("LOCATION")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(Color.white.opacity(0.7))
+                        .padding(.bottom, 2)
+                    
+                    Text(viewModel.locationName) // e.g. "809 Bay Dr"
+                        .font(.system(size: 26, weight: .bold))
+                        .foregroundColor(.white)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding([.leading, .top], 24)
+                
                 Spacer()
                 
-                compassSection
-                    .onChange(of: isAligned, perform: handleAlignmentChange)
+                // 3) Compass: big arrow + partial arc
+                CompassView(
+                    deviceHeading: viewModel.deviceHeading,
+                    qiblaBearing: viewModel.qiblaBearing, isAligned: true
+                )
+                .frame(width: 250, height: 250)
                 
-                directionStatusView
+                // 4) Degrees + direction text
+                //    "153°" + "to your left" or "slight left" etc.
+                VStack(spacing: 4) {
+                    // Convert the numeric angle to Int or keep Double with 0 decimals
+                    let angleText = String(format: "%.0f°", viewModel.relativeAngle)
+                    
+                    Text(angleText)
+                        .font(.system(size: 40, weight: .bold))
+                        .foregroundColor(.white)
+                    
+                    Text(viewModel.directionHint) // "to your left", "slight left", etc.
+                        .font(.system(size: 26, weight: .regular))
+                        .foregroundColor(Color.white.opacity(0.8))
+                }
+                .padding(.top, 16)
+                
                 Spacer()
                 
-                statusView
-            }
-            .padding()
-        }
-        .navigationBarHidden(true) // or .toolbar(.hidden) on iOS 16+
-        .onAppear(perform: handleOnAppear)
-        .onDisappear(perform: handleOnDisappear)
-        .onChange(of: scenePhase, perform: handleScenePhaseChange)
-    }
-}
-
-// MARK: - Computed Properties & Helpers
-extension QiblaView {
-    
-    /// The difference between Qibla bearing and device heading in the range [−180, 180].
-    private var bearingDifference: Double {
-        let bearing = viewModel.qiblaBearing
-        let heading = viewModel.deviceHeading
-        var diff = (bearing - heading).truncatingRemainder(dividingBy: 360)
-        if diff > 180  { diff -= 360 }
-        if diff < -180 { diff += 360 }
-        return diff
-    }
-    
-    /// Determines if user is within alignmentThreshold of Qibla direction.
-    private var isAligned: Bool {
-        abs(bearingDifference) < alignmentThreshold
-    }
-    
-    /// Instructional text based on whether user is aligned or needs to turn left/right.
-    private var directionMessage: String {
-        if isAligned {
-            return "Facing Qibla"
-        }
-        return bearingDifference > 0 ? "Turn Right" : "Turn Left"
-    }
-    
-    /// Wrap error message in an identifiable struct to present as an Alert.
-    private var errorWrapper: IdentifiableError? {
-        guard let errorMessage = viewModel.errorMessage else { return nil }
-        return IdentifiableError(message: errorMessage)
-    }
-}
-
-// MARK: - Subviews
-extension QiblaView {
-    
-    /// Background gradient
-    private var backgroundGradient: some View {
-        LinearGradient(
-            gradient: Gradient(colors: [
-                Color(red: 0.05, green: 0.10, blue: 0.30),
-                Color(red: 0.50, green: 0.25, blue: 0.60)
-            ]),
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
-    
-    /// Top header with back button, title, and calibration button
-    private var headerView: some View {
-        HStack {
-            Button(action: { dismiss() }) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(.white)
-            }
-            
-            Spacer()
-            
-            Text("Qibla Direction")
-                .font(.system(size: 20, weight: .bold))
-                .foregroundColor(.white)
-            
-            Spacer()
-            
-            Button(action: { viewModel.startCalibration() }) {
-                Image(systemName: "arrow.triangle.2.circlepath")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(.white)
+                // 5) Bottom bar with phone icon & heart icon
+                HStack {
+                    // Left icon (could be phone rotation instructions)
+                    Button(action: {
+                        // Possibly call viewModel.startCalibration() or show info
+                    }) {
+                        Image(systemName: "iphone.radiowaves.left.and.right")
+                            .font(.system(size: 28))
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Circle().fill(Color.black.opacity(0.2)))
+                    }
+                    
+                    Spacer()
+                    
+                    // Right icon (could be a favorite or "like")
+                    Button(action: {
+                        // Your logic here
+                    }) {
+                        Image(systemName: "heart")
+                            .font(.system(size: 28))
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Circle().fill(Color.black.opacity(0.2)))
+                    }
+                }
+                .padding([.leading, .trailing, .bottom], 24)
             }
         }
-        .padding(.horizontal)
-        .padding(.top, 20)
-    }
-    
-    /// Compass + alignment indicator using the extremely smooth `SmoothCompassView`
-    private var compassSection: some View {
-        SmoothCompassView(
-            deviceHeading: viewModel.deviceHeading,
-            qiblaBearing: viewModel.qiblaBearing,
-            isAligned: isAligned
-        )
-        .frame(width: compassSize, height: compassSize)
-    }
-    
-    /// Direction message (Facing Qibla / Turn Left / Turn Right) + location name
-    private var directionStatusView: some View {
-        VStack(spacing: 12) {
-            Text(directionMessage)
-                .font(.system(size: 28, weight: .bold, design: .rounded))
-                .foregroundColor(isAligned ? .green : .white)
-                .animation(.easeInOut(duration: 0.3), value: directionMessage)
-            
-            Text(viewModel.locationName)
-                .font(.system(size: 16))
-                .foregroundColor(.white.opacity(0.8))
+        .onAppear {
+            viewModel.resumeUpdates()
         }
-        .padding(.top, 30)
-    }
-    
-    /// Accuracy & calibration status below
-    private var statusView: some View {
-        VStack(spacing: 8) {
-            accuracyStatusView
-            calibrationStatusView
+        .onDisappear {
+            viewModel.stopAllUpdates()
         }
-        .padding(.bottom, 20)
-    }
-    
-    /// Shows current accuracy level & status text
-    private var accuracyStatusView: some View {
-        HStack {
-            Image(systemName: viewModel.accuracy == .high
-                  ? "checkmark.circle.fill"
-                  : "exclamationmark.circle.fill")
-                .foregroundColor(viewModel.accuracy == .high ? .green : .orange)
-            
-            Text(viewModel.locationStatus)
-                .foregroundColor(.white.opacity(0.8))
-                .font(.system(size: 16))
+        .onChange(of: scenePhase) { newPhase in
+            switch newPhase {
+            case .active:
+                viewModel.resumeUpdates()
+            case .inactive, .background:
+                viewModel.stopAllUpdates()
+            @unknown default:
+                break
+            }
+        }
+        // 6) Haptic feedback if user crosses alignment threshold
+        .onChange(of: isClose) { newValue in
+            if newValue {
+                hapticFeedback.prepare()
+                hapticFeedback.impactOccurred(intensity: 0.7)
+            }
         }
     }
-    
-    /// If calibrationRequired, prompt user to calibrate
-    private var calibrationStatusView: some View {
-        if viewModel.calibrationRequired {
-            return AnyView(
-                Text("Please calibrate your device")
-                    .font(.system(size: 14))
-                    .foregroundColor(.orange)
-            )
-        } else {
-            return AnyView(EmptyView())
-        }
-    }
-}
-
-// MARK: - Lifecycle & Interaction Handlers
-extension QiblaView {
-    
-    /// Called when `scenePhase` changes (foreground, background, etc.)
-    private func handleScenePhaseChange(_ newPhase: ScenePhase) {
-        switch newPhase {
-        case .active:
-            // Optionally force calibration upon return
-            viewModel.startCalibration()
-        case .inactive, .background:
-            // Stop or reduce updates to save battery, if desired
-            break
-        @unknown default:
-            break
-        }
-    }
-    
-    /// Called when the view appears
-    private func handleOnAppear() {
-        // Resume location/heading updates if you want them only while this view is active
-        viewModel.resumeUpdates()
-    }
-    
-    /// Called when the view disappears
-    private func handleOnDisappear() {
-        // Stop location/heading updates to save battery
-        viewModel.stopAllUpdates()
-    }
-    
-    /// Called whenever `isAligned` changes
-    private func handleAlignmentChange(_ aligned: Bool) {
-        if aligned {
-            hapticFeedback.prepare()
-            hapticFeedback.impactOccurred(intensity: 0.7)
-        }
-    }
-}
-
-// MARK: - Alert Handling (if you want an Alert for errors)
-extension QiblaView {
-    private func showErrorAlert(error: IdentifiableError) -> Alert {
-        Alert(
-            title: Text("Error"),
-            message: Text(error.message),
-            dismissButton: .default(Text("OK"))
-        )
-    }
-}
-
-// MARK: - IdentifiableError for Alerts
-struct IdentifiableError: Identifiable {
-    let id = UUID()
-    let message: String
 }

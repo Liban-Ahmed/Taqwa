@@ -13,7 +13,7 @@ import Adhan
 
 class QiblaDirectionViewModel: NSObject, ObservableObject {
     
-    // MARK: - Published Properties (Observed by SwiftUI Views)
+    // MARK: - Published Properties
     @Published var qiblaBearing: Double = 0.0
     @Published var deviceHeading: Double = 0.0
     
@@ -24,6 +24,12 @@ class QiblaDirectionViewModel: NSObject, ObservableObject {
     @Published var accuracy: LocationAccuracy = .low
     @Published var calibrationRequired: Bool = false
     
+    /// The difference between device heading and Qibla direction (0–180), for UI display.
+    @Published var relativeAngle: Double = 0.0
+    
+    /// e.g. "to your left", "slight left", "to your right", "straight ahead".
+    @Published var directionHint: String = "Straight ahead"
+    
     // MARK: - Accuracy Enum
     enum LocationAccuracy {
         case low, medium, high
@@ -33,14 +39,11 @@ class QiblaDirectionViewModel: NSObject, ObservableObject {
     private let locationManager = CLLocationManager()
     private let motionManager = CMMotionManager()
     
-    /// Stores heading in a continuous manner to avoid abrupt flips around 0°/360°.
     private var internalHeading: Double = 0.0
-    
-    /// If you want to limit Qibla updates (e.g., every X seconds), track the last update time.
     private var lastQiblaUpdate: Date?
     private let updateInterval: TimeInterval = 1.0
     
-    // Reverse Geocoding Caching
+    // For limiting reverse-geocode calls
     private var lastGeocodedLocation: CLLocation?
     private var lastGeocodeTime: Date?
     private let minimumLocationDistance: CLLocationDistance = 100
@@ -57,7 +60,6 @@ class QiblaDirectionViewModel: NSObject, ObservableObject {
     }
     
     deinit {
-        // Clean up everything when this object is deallocated
         locationManager.stopUpdatingLocation()
         locationManager.stopUpdatingHeading()
         motionManager.stopDeviceMotionUpdates()
@@ -71,14 +73,12 @@ class QiblaDirectionViewModel: NSObject, ObservableObject {
         locationManager.headingFilter = 2    // Updates every 2 degrees
         locationManager.requestWhenInUseAuthorization()
         
-        // Begin updates immediately. Alternatively, you could start these only in onAppear of a view.
         locationManager.startUpdatingLocation()
         locationManager.startUpdatingHeading()
     }
     
     // MARK: - Public Methods
     
-    /// Forces a calibration cycle by temporarily stopping heading updates.
     func startCalibration() {
         locationManager.stopUpdatingHeading()
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
@@ -86,14 +86,12 @@ class QiblaDirectionViewModel: NSObject, ObservableObject {
         }
     }
     
-    // If you need to stop all location/heading updates (e.g., onDisappear):
     func stopAllUpdates() {
         locationManager.stopUpdatingLocation()
         locationManager.stopUpdatingHeading()
         motionManager.stopDeviceMotionUpdates()
     }
     
-    // If you need to resume updates (e.g., onAppear):
     func resumeUpdates() {
         locationManager.startUpdatingLocation()
         locationManager.startUpdatingHeading()
@@ -101,44 +99,32 @@ class QiblaDirectionViewModel: NSObject, ObservableObject {
     }
     
     // MARK: - Device Orientation Handling
-    /// Updates headingOffset based on device orientation via CoreMotion.
     private func startDeviceOrientationUpdates() {
         guard motionManager.isDeviceMotionAvailable else { return }
         
         motionManager.deviceMotionUpdateInterval = 1.0 / 60.0
         motionManager.startDeviceMotionUpdates(to: .main) { [weak self] motion, error in
-            guard let self = self, motion != nil else { return }
+            guard let self = self else { return }
             let orientation = UIDevice.current.orientation
             
             switch orientation {
             case .portrait:
                 self.headingOffset = 0
             case .landscapeLeft:
-                // On iPhone, "landscapeLeft" means device top is to the left.
-                // Typically, heading is offset -90 in that scenario.
+                // Typically offset -90 for iPhone in landscapeLeft
                 self.headingOffset = -90
             case .landscapeRight:
                 self.headingOffset = 90
             case .portraitUpsideDown:
                 self.headingOffset = 180
             default:
-                // For faceUp, faceDown, unknown, etc., do nothing or set to 0
                 self.headingOffset = 0
             }
         }
     }
     
     // MARK: - Qibla Calculation
-    /// Uses Adhan’s Qibla calculation to update the qiblaBearing based on the user’s current location.
     private func updateQiblaBearing(from location: CLLocation) {
-        // Rate limiting example if needed:
-        /*
-        if let lastUpdate = lastQiblaUpdate, Date().timeIntervalSince(lastUpdate) < updateInterval {
-            return
-        }
-        lastQiblaUpdate = Date()
-        */
-        
         let coords = Coordinates(
             latitude: location.coordinate.latitude,
             longitude: location.coordinate.longitude
@@ -149,43 +135,78 @@ class QiblaDirectionViewModel: NSObject, ObservableObject {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
             qiblaBearing = qiblaDirection
         }
+        
+        // After updating qiblaBearing, recalculate relative angle.
+        recalcRelativeAngle()
     }
     
     // MARK: - Heading Calculation
-    /// Smoothly updates `deviceHeading` without abrupt flips.
     private func updateHeadingContinuously(_ newHeading: Double) {
-        // Calculate the smallest difference in [–180, 180]
+        // Smooth out abrupt flips near 0/360
         let diff = (newHeading - internalHeading).truncatingRemainder(dividingBy: 360)
         
         if diff > 180 {
-            internalHeading -= 360 - diff
+            internalHeading -= (360 - diff)
         } else if diff < -180 {
-            internalHeading += 360 + diff
+            internalHeading += (360 + diff)
         } else {
             internalHeading += diff
         }
         
-        // Now clamp it to [0, 360)
         let normalized = internalHeading.truncatingRemainder(dividingBy: 360)
         deviceHeading = normalized < 0 ? normalized + 360 : normalized
+        
+        // Once deviceHeading is updated, recalc the difference to Qibla
+        recalcRelativeAngle()
+    }
+    
+    /// Recalculate the difference between the device heading and qibla bearing
+    /// and also produce text instructions like "to your left," "slight right," etc.
+    private func recalcRelativeAngle() {
+        // The difference in [0, 360)
+        var angle = (qiblaBearing - deviceHeading).truncatingRemainder(dividingBy: 360)
+        if angle < 0 { angle += 360 }
+        
+        // If angle <= 180, Qibla is to the RIGHT. Otherwise, to the LEFT.
+        if angle <= 180 {
+            // Right side
+            relativeAngle = angle
+            directionHint = angleDirectionText(angle: angle, isLeft: false)
+        } else {
+            // Left side
+            relativeAngle = 360 - angle
+            directionHint = angleDirectionText(angle: relativeAngle, isLeft: true)
+        }
+    }
+    
+    /// Simple utility to produce "slight left," "to your left," or "straight ahead."
+    private func angleDirectionText(angle: Double, isLeft: Bool) -> String {
+        // If angle is super small, treat it as "straight ahead"
+        if angle < 5 {
+            return "Facing The Qibla"
+        } else if angle < 20 {
+            return isLeft ? "slight left" : "slight right"
+        } else {
+            return isLeft ? "to your left" : "to your right"
+        }
     }
     
     // MARK: - Reverse Geocoding
     private func updateLocationNameIfNeeded(from location: CLLocation) {
-        // Check if we should update based on distance/time to reduce geocoding calls
-        if let lastLocation = lastGeocodedLocation, let lastTime = lastGeocodeTime {
+        if let lastLocation = lastGeocodedLocation,
+           let lastTime = lastGeocodeTime {
             let distance = location.distance(from: lastLocation)
             let timeSinceLastUpdate = Date().timeIntervalSince(lastTime)
-            if distance < minimumLocationDistance && timeSinceLastUpdate < geocodeInterval {
+            
+            if distance < minimumLocationDistance &&
+                timeSinceLastUpdate < geocodeInterval {
                 return
             }
         }
         
-        // Update cache
         lastGeocodedLocation = location
         lastGeocodeTime = Date()
         
-        // Reverse geocode
         let geocoder = CLGeocoder()
         
         if #available(iOS 15.0, *) {
@@ -193,10 +214,8 @@ class QiblaDirectionViewModel: NSObject, ObservableObject {
                 do {
                     let placemarks = try await geocoder.reverseGeocodeLocation(location)
                     if let pm = placemarks.first {
-                        let city = pm.locality ?? "Unknown City"
-                        let country = pm.country ?? "Unknown Country"
                         await MainActor.run {
-                            self.locationName = "\(city), \(country)"
+                            self.locationName = self.parsePlacemark(pm)
                         }
                     }
                 } catch {
@@ -207,7 +226,6 @@ class QiblaDirectionViewModel: NSObject, ObservableObject {
             }
             return
         }
-    
         
         // Fallback for iOS < 15
         geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
@@ -218,13 +236,28 @@ class QiblaDirectionViewModel: NSObject, ObservableObject {
                     return
                 }
                 if let placemark = placemarks?.first {
-                    let city = placemark.locality ?? "Unknown City"
-                    let country = placemark.country ?? "Unknown Country"
-                    self.locationName = "\(city), \(country)"
+                    self.locationName = self.parsePlacemark(placemark)
                 } else {
                     self.locationName = "Unknown Location"
                 }
             }
+        }
+    }
+    
+    /// Helper to build "809 Bay Dr", "1717 S Grand Ave" etc.
+    private func parsePlacemark(_ pm: CLPlacemark) -> String {
+        let streetNumber = pm.subThoroughfare ?? ""
+        let streetName = pm.thoroughfare ?? ""
+        let city = pm.locality ?? ""
+        
+        // If we have an actual street name and number, show that.
+        let addressLine = "\(streetNumber) \(streetName)".trimmingCharacters(in: .whitespaces)
+        
+        // If missing thoroughfare or subThoroughfare, fallback to city.
+        if addressLine.isEmpty {
+            return city.isEmpty ? "Unknown Location" : city
+        } else {
+            return addressLine
         }
     }
 }
@@ -232,7 +265,6 @@ class QiblaDirectionViewModel: NSObject, ObservableObject {
 // MARK: - CLLocationManagerDelegate
 extension QiblaDirectionViewModel: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        // Handle changes in authorization if needed
         switch status {
         case .denied, .restricted:
             locationStatus = "Location access denied"
@@ -241,17 +273,15 @@ extension QiblaDirectionViewModel: CLLocationManagerDelegate {
             locationStatus = "Requesting location authorization"
         case .authorizedWhenInUse, .authorizedAlways:
             locationStatus = "Location access granted"
-            // Could start location updates here if not already started
         @unknown default:
             locationStatus = "Unknown location authorization status"
         }
     }
     
-    // Called whenever we get a new location
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last, location.horizontalAccuracy >= 0 else { return }
         
-        // Update location accuracy display
+        // Update accuracy for the UI
         let accuracyValue = location.horizontalAccuracy
         switch accuracyValue {
         case 0...20:
@@ -268,30 +298,26 @@ extension QiblaDirectionViewModel: CLLocationManagerDelegate {
         // Update Qibla bearing
         updateQiblaBearing(from: location)
         
-        // Reverse geocode location name if needed
+        // Update location name if needed
         updateLocationNameIfNeeded(from: location)
     }
     
-    // Called whenever heading changes
     func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
         // If heading is invalid, might require calibration
         if newHeading.headingAccuracy < 0 {
             calibrationRequired = true
             return
         }
-        
         calibrationRequired = false
         
-        // Adjust for device orientation offset
+        // Adjust for device orientation
         let rawHeading = newHeading.magneticHeading + headingOffset
         
-        // Smoothly update heading
         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
             updateHeadingContinuously(rawHeading)
         }
     }
     
-    // Called if location manager fails
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         if let clError = error as? CLError {
             switch clError.code {
