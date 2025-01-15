@@ -26,6 +26,8 @@ struct CompassView: View {
     var body: some View {
         GeometryReader { geo in
             let size = min(geo.size.width, geo.size.height)
+            // test
+            
             
             ZStack {
                 // 1) Partial Arc
@@ -40,18 +42,18 @@ struct CompassView: View {
                     .frame(width: size, height: size)
                     .rotationEffect(.degrees(-90)) // so arc sits “on top” like the screenshots
                 
-                // 2) Center Diamond
-                DiamondShape()
-                    .fill(baseColor)
-                    .frame(width: size * 0.4, height: size * 0.4)
-                    .rotationEffect(.degrees(displayedQiblaBearing - displayedDeviceHeading))
-                    .shadow(
-                        color: baseColor.opacity(isAligned ? 1.0 : 0.0),
-                        radius: isAligned ? size * 0.07 : 0
-                    )
-                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isAligned)
-            }
-            .frame(width: size, height: size)
+                // 2) Arrow (replacing Diamond)
+                                Image(systemName: "arrow.up")
+                                    .font(.system(size: size * 0.4, weight: .bold))
+                                    .foregroundColor(baseColor)
+                                    .rotationEffect(.degrees(displayedQiblaBearing - displayedDeviceHeading))
+                                    .shadow(
+                                        color: baseColor.opacity(isAligned ? 1.0 : 0.0),
+                                        radius: isAligned ? size * 0.07 : 0
+                                    )
+                                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isAligned)
+                            }
+                            .frame(width: size, height: size)
         }
         .onAppear {
             // Initialize displayed angles
@@ -96,29 +98,6 @@ struct PartialArcShape: Shape {
 }
 
 // MARK: - Diamond Shape
-/**
- A simple diamond: basically a square rotated 45° so that it “points” upward/downward.
- */
-struct DiamondShape: Shape {
-    func path(in rect: CGRect) -> Path {
-        let w = rect.width
-        let h = rect.height
-        
-        var path = Path()
-        // Move to top center
-        path.move(to: CGPoint(x: w / 2, y: 0))
-        // Right center
-        path.addLine(to: CGPoint(x: w, y: h / 2))
-        // Bottom center
-        path.addLine(to: CGPoint(x: w / 2, y: h))
-        // Left center
-        path.addLine(to: CGPoint(x: 0, y: h / 2))
-        // Close path back to top center
-        path.closeSubpath()
-        
-        return path
-    }
-}
 
 // MARK: - Timer-based Smoothing
 extension CompassView {

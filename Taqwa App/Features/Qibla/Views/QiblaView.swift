@@ -50,7 +50,7 @@ struct QiblaView: View {
                 // 3) Compass: big arrow + partial arc
                 CompassView(
                     deviceHeading: viewModel.deviceHeading,
-                    qiblaBearing: viewModel.qiblaBearing, isAligned: true
+                    qiblaBearing: viewModel.qiblaBearing
                 )
                 .frame(width: 250, height: 250)
                 
