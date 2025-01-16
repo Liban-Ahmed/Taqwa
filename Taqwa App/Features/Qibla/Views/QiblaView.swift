@@ -4,12 +4,7 @@
 //
 //  Created by Liban Ahmed on 12/31/24.
 //
-//
-//  QiblaView.swift
-//  Qibla Direction App
-//
-//  Created by Liban Ahmed on 12/31/24.
-//
+
 import SwiftUI
 import CoreLocation
 import Combine

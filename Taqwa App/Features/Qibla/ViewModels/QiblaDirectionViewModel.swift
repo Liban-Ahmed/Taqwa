@@ -199,3 +199,4 @@ class QiblaDirectionViewModel: NSObject, ObservableObject, CLLocationManagerDele
     }
     
 }
+
