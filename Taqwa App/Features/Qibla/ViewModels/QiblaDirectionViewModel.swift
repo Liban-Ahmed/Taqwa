@@ -24,7 +24,7 @@ class QiblaDirectionViewModel: NSObject, ObservableObject, CLLocationManagerDele
     
     // The arrow’s actual displayed angle (difference from Qibla).
     @Published var arrowAngle: Double = 0.0
-
+    
     // MARK: - Private Properties
     private let locationManager = CLLocationManager()
     private let motionManager = CMMotionManager()
@@ -120,8 +120,8 @@ class QiblaDirectionViewModel: NSObject, ObservableObject, CLLocationManagerDele
         
         // 1) Determine the best heading value
         let headingValue = newHeading.trueHeading > 0
-            ? newHeading.trueHeading
-            : newHeading.magneticHeading
+        ? newHeading.trueHeading
+        : newHeading.magneticHeading
         
         // 2) Adjust for portrait/landscape offset
         let adjustedHeading = headingValue + headingOffset
@@ -152,7 +152,7 @@ class QiblaDirectionViewModel: NSObject, ObservableObject, CLLocationManagerDele
             provideHapticFeedback()
         }
     }
-
+    
     
     // MARK: - Error Handling
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
@@ -252,7 +252,7 @@ class QiblaDirectionViewModel: NSObject, ObservableObject, CLLocationManagerDele
         }
     }
     
-
+    
     private func provideHapticFeedback() {
         let generator = UIImpactFeedbackGenerator(style: .heavy)
         generator.prepare()        // Prepares the Taptic Engine

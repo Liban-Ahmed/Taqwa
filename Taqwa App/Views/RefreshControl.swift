@@ -10,9 +10,9 @@ import SwiftUI
 struct RefreshControl: View {
     let coordinateSpace: CoordinateSpace
     let onRefresh: () -> Void
-
+    
     @State private var isRefreshing: Bool = false
-
+    
     var body: some View {
         GeometryReader { geo in
             if geo.frame(in: coordinateSpace).midY > 50 {

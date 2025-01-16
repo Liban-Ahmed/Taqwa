@@ -6,7 +6,7 @@ struct DateSelectorView: View {
     let hijriDate: String
     let onPreviousDate: () -> Void
     let onNextDate: () -> Void
-
+    
     // New closure
     let onToday: () -> Void
     

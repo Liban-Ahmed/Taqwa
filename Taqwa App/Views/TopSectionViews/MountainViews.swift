@@ -10,12 +10,12 @@ import SwiftUI
 struct MountainRangeView: View {
     let currentPrayer: String
     let scrollOffset: CGFloat
-
+    
     var body: some View {
         ZStack {
             // Back mountain (now static)
             BackMountainView(currentPrayer: currentPrayer)
-
+            
             // Front mountain (now static)
             FrontMountainView(currentPrayer: currentPrayer)
         }
@@ -24,12 +24,12 @@ struct MountainRangeView: View {
 
 struct BackMountainView: View {
     let currentPrayer: String
-
+    
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
             let h = geo.size.height
-
+            
             ZStack {
                 Path { path in
                     path.move(to: CGPoint(x: 0, y: h * 0.8))
@@ -50,7 +50,7 @@ struct BackMountainView: View {
                         endPoint: .top
                     )
                 )
-
+                
                 // Snow cap
                 Path { path in
                     path.move(to: CGPoint(x: w * 0.32, y: h * 0.28))
@@ -66,12 +66,12 @@ struct BackMountainView: View {
 
 struct FrontMountainView: View {
     let currentPrayer: String
-
+    
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
             let h = geo.size.height
-
+            
             ZStack {
                 Path { path in
                     path.move(to: CGPoint(x: 0, y: h * 0.7))
@@ -92,7 +92,7 @@ struct FrontMountainView: View {
                         endPoint: .top
                     )
                 )
-
+                
                 // Ridge snow
                 Path { path in
                     path.move(to: CGPoint(x: w * 0.25, y: h * 0.36))

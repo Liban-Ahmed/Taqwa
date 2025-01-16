@@ -1,7 +1,5 @@
 import SwiftUI
 
-import SwiftUI
-
 enum Tab: String, CaseIterable {
     case prayer
     case qibla

@@ -109,11 +109,11 @@ struct LessonView: View {
             HStack {
                 Button(action: {
                     dismiss() }) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(.white)
-                    
-                }
+                        Image(systemName: "xmark")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(.white)
+                        
+                    }
                 
                 Spacer()
                 

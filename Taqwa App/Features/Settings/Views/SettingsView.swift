@@ -25,7 +25,7 @@ struct SettingsView: View {
         "Dubai",
         "Kuwait"
     ]
-   
+    
     
     private let madhabs = ["Hanafi", "Shafi"]
     

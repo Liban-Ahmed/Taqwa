@@ -86,7 +86,7 @@ struct LessonCard: View {
                 .foregroundColor(.primary)
             
             // Preview text
-           
+            
             
             // Footer
             HStack {

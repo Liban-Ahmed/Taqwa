@@ -19,7 +19,7 @@ struct TrendView: View {
             calendar.date(byAdding: .day, value: offset, to: mondayOfWeek)
         }
     }
-
+    
     var body: some View {
         VStack(spacing: 8) {
             // 7-day layout with circular progress for each day
@@ -33,7 +33,7 @@ struct TrendView: View {
                         Calendar.current.component(.weekday, from: day) - 1
                     ].prefix(1)
                     let isToday = Calendar.current.isDateInToday(day)
-
+                    
                     ZStack {
                         CircularProgressView(progress: dayProgress)
                             .frame(width: 32, height: 32)
@@ -51,14 +51,14 @@ struct TrendView: View {
 
 struct CircularProgressView: View {
     var progress: Double
-
+    
     var body: some View {
         ZStack {
             // Background circle
             Circle()
                 .stroke(lineWidth: 6)
                 .foregroundColor(Color.gray.opacity(0.2))
-
+            
             // Progress circle
             Circle()
                 .trim(from: 0, to: progress)

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var selectedTab: Tab = .prayer
-
+    
     var body: some View {
         VStack(spacing: 0) {
             switch selectedTab {
@@ -22,7 +22,7 @@ struct HomeView: View {
             case .settings:
                 Text("Settings View (Placeholder)")
             }
-
+            
             BottomNavigationBarView(selectedTab: $selectedTab)
         }
     }

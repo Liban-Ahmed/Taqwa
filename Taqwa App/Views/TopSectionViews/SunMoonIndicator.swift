@@ -10,7 +10,7 @@ import CoreLocation
 // MARK: - SUN / MOON INDICATOR (Colored Faded Rings)
 struct SunMoonIndicator: View {
     let isDaytime: Bool
-
+    
     var body: some View {
         ZStack {
             // Outer ring 3
@@ -18,19 +18,19 @@ struct SunMoonIndicator: View {
                 .fill((isDaytime ? Color.yellow : Color.white).opacity(0.1))
                 .frame(width: 160, height: 160)
                 .animation(nil, value: isDaytime)
-
+            
             // Outer ring 2
             Circle()
                 .fill((isDaytime ? Color.yellow : Color.white).opacity(0.2))
                 .frame(width: 130, height: 130)
                 .animation(nil, value: isDaytime)
-
+            
             // Outer ring 1
             Circle()
                 .fill((isDaytime ? Color.yellow : Color.white).opacity(0.3))
                 .frame(width: 100, height: 100)
                 .animation(nil, value: isDaytime)
-
+            
             // Inner glowing circle
             Circle()
                 .fill(isDaytime ? Color.yellow : Color.white)

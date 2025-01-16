@@ -38,7 +38,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-            // Request notification authorization
+        // Request notification authorization
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge, .criticalAlert, .timeSensitive]) { granted, error in
             if granted {
                 print("Notification authorization (including critical/time-sensitive) granted")
@@ -46,11 +46,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 print("Notification authorization error: \(error.localizedDescription)")
             }
         }
-            
-            #if DEBUG
-            runDebugTests()
-            #endif
-            
-            return true 
-        }
+        
+#if DEBUG
+        runDebugTests()
+#endif
+        
+        return true 
+    }
 }

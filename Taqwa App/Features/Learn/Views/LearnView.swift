@@ -41,7 +41,7 @@ struct LearnView: View {
             viewModel.loadModules()
         }
     }
-
+    
     private var headerSection: some View {
         VStack(spacing: 8) {
             Text("Islamic Learning")

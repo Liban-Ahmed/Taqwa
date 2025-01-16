@@ -17,25 +17,25 @@ extension TopSectionView {
         }
         .padding(.horizontal, 30)
     }
-
+    
     // MARK: - DAY/NIGHT CHECK
-        var isDaytime: Bool {
-            // Use the current prayer to determine day or night
-            switch currentPrayer {
-            case "Fajr", "Dhuhr", "Asr":
-                return true
-            case "Maghrib", "Isha":
-                return false
-            default:
-                return true // Default to daytime if unknown
-            }
+    var isDaytime: Bool {
+        // Use the current prayer to determine day or night
+        switch currentPrayer {
+        case "Fajr", "Dhuhr", "Asr":
+            return true
+        case "Maghrib", "Isha":
+            return false
+        default:
+            return true // Default to daytime if unknown
         }
-
+    }
+    
     // MARK: - HELPER: PARALLAX OFFSET
     func parallaxOffset(base: CGFloat, rate: CGFloat) -> CGFloat {
         base + fakeScrollOffset * rate
     }
-
+    
     // MARK: - HELPER: BACKGROUND GRADIENT
     func backgroundGradient(for prayer: String) -> LinearGradient {
         switch prayer {
@@ -95,7 +95,7 @@ extension TopSectionView {
             )
         }
     }
-
+    
     // MARK: - HELPER: PRAYER ICON
     func systemIcon(for prayer: String) -> String {
         switch prayer {

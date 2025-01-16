@@ -304,4 +304,4 @@ struct QuizView: View {
         showScore = false
     }
 }
-    
+

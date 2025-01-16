@@ -43,7 +43,7 @@ struct QiblaView: View {
             // If we’re within ±10°, use green; otherwise gray
             Color(isFacingQibla ? .green : .gray)
                 .ignoresSafeArea()
-                // Animate color changes over 0.5s
+            // Animate color changes over 0.5s
                 .animation(.easeInOut(duration: 0.5), value: isFacingQibla)
             
             VStack(spacing: 30) {
@@ -61,7 +61,7 @@ struct QiblaView: View {
                     Circle()
                         .strokeBorder(Color.white.opacity(0.2), lineWidth: 2)
                         .frame(width: 300, height: 300)
-
+                    
                     // Cardinal markers (N, E, S, W)
                     ForEach(0..<4) { index in
                         let labels = ["N", "E", "S", "W"]
@@ -72,7 +72,7 @@ struct QiblaView: View {
                             .offset(x: 0, y: -140) // position label on circle
                             .rotationEffect(.degrees(angle))
                     }
-
+                    
                     // Arrow
                     Image(systemName: "arrow.up")
                         .resizable()
@@ -82,7 +82,7 @@ struct QiblaView: View {
                         .rotationEffect(.degrees(viewModel.arrowAngle))
                 }
                 .frame(width: 300, height: 300)
-
+                
                 Spacer()
                 
                 // Location Info

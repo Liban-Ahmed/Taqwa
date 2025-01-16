@@ -12,54 +12,54 @@ struct PrayerTimesView: View {
     
     
     var body: some View {
-            NavigationStack {
-                ZStack {
-                    // Background gradient at root level
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Color(red: 0.05, green: 0.10, blue: 0.30),
-                            Color(red: 0.50, green: 0.25, blue: 0.60)
-                        ]),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    .ignoresSafeArea()
-                    
-                    VStack(spacing: 0) {
-                        switch selectedTab {
-                        case .prayer:
-                            VStack(spacing: 0) {
-                                TopSectionView(
-                                    currentPrayer: viewModel.currentPrayer,
-                                    timeRemaining: viewModel.timeRemaining
-                                )
-                                .padding(.top, 1)
-                                
-                                GridLayoutView(selectedTab: $selectedTab)
-                                    .padding(.horizontal)
-                                    .padding(.top, 20)
-                                    .padding(.bottom, 30)
-                                    
-                                Spacer()
-                            }
+        NavigationStack {
+            ZStack {
+                // Background gradient at root level
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color(red: 0.05, green: 0.10, blue: 0.30),
+                        Color(red: 0.50, green: 0.25, blue: 0.60)
+                    ]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
+                
+                VStack(spacing: 0) {
+                    switch selectedTab {
+                    case .prayer:
+                        VStack(spacing: 0) {
+                            TopSectionView(
+                                currentPrayer: viewModel.currentPrayer,
+                                timeRemaining: viewModel.timeRemaining
+                            )
+                            .padding(.top, 1)
                             
-                        case .qibla:
-                            QiblaView()
+                            GridLayoutView(selectedTab: $selectedTab)
+                                .padding(.horizontal)
+                                .padding(.top, 20)
+                                .padding(.bottom, 30)
                             
-                        case .tracker:
-                            TrackerView()
-                            
-                        case .settings:
-                            SettingsView()
+                            Spacer()
                         }
                         
-                        BottomNavigationBarView(selectedTab: $selectedTab)
-                            .padding(.bottom, 8)
+                    case .qibla:
+                        QiblaView()
+                        
+                    case .tracker:
+                        TrackerView()
+                        
+                    case .settings:
+                        SettingsView()
                     }
+                    
+                    BottomNavigationBarView(selectedTab: $selectedTab)
+                        .padding(.bottom, 8)
                 }
             }
-            .onAppear {
-                viewModel.fetchPrayerTimes(for: Date())
-            }
+        }
+        .onAppear {
+            viewModel.fetchPrayerTimes(for: Date())
         }
     }
+}

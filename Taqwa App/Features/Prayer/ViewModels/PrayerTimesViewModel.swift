@@ -38,26 +38,26 @@ class PrayerTimesViewModel: ObservableObject {
         }
         
         @MainActor
-           func updatePrayerTimesForSelectedDate() {
-               fetchPrayerTimes(for: selectedDate)
-           }
-           
-           @MainActor
-           func savePrayerState(for prayer: PrayerTime) {
-               let baseKey = dayKey(for: selectedDate)
-               let key = "\(baseKey)-\(prayer.name)"
-               UserDefaults.standard.set(prayer.status.rawValue, forKey: key)
-               UserDefaults.standard.synchronize()
-           }
+        func updatePrayerTimesForSelectedDate() {
+            fetchPrayerTimes(for: selectedDate)
+        }
+        
+        @MainActor
+        func savePrayerState(for prayer: PrayerTime) {
+            let baseKey = dayKey(for: selectedDate)
+            let key = "\(baseKey)-\(prayer.name)"
+            UserDefaults.standard.set(prayer.status.rawValue, forKey: key)
+            UserDefaults.standard.synchronize()
+        }
     }
-
-
+    
+    
     // Use day-only for stable keys
     internal func dayKey(for date: Date) -> String {
         let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
         return "\(components.year!)-\(components.month!)-\(components.day!)"
     }
-
+    
     public func prayerTimesForDate(_ date: Date) -> [PrayerTime] {
         guard let location = locationManager.lastKnownLocation else {
             return []
@@ -106,7 +106,7 @@ class PrayerTimesViewModel: ObservableObject {
                     self.prayerTimes = prayerTimesForDay.times
                     self.locationName = locationName
                     self.hijriDate = IslamicDateConverter.convertToHijri(date: date) // Update Hijri date
-
+                    
                     // load prayer states from user defaults
                     self.loadPrayerStates()
                 }
@@ -132,7 +132,7 @@ class PrayerTimesViewModel: ObservableObject {
         UserDefaults.standard.set(prayer.status.rawValue, forKey: key)
         UserDefaults.standard.synchronize()
     }
-
+    
     func loadPrayerStates() {
         let baseKey = dayKey(for: selectedDate)
         for index in prayerTimes.indices {
@@ -153,22 +153,22 @@ class PrayerTimesViewModel: ObservableObject {
             // Keep the logic defaulting to today's times
             return
         }
-
+        
         let nextPrayerIndex = prayerTimes.firstIndex(where: { $0.time > currentTime })
         var currentPrayer: String = ""
         var timeRemaining: String = ""
-
+        
         if let nextPrayerIndex = nextPrayerIndex {
             let currentPrayerTime = nextPrayerIndex > 0 ? prayerTimes[nextPrayerIndex - 1].time : Date()
             let nextPrayer = prayerTimes[nextPrayerIndex]
             let nextPrayerTime = nextPrayer.time
-
+            
             let totalInterval = nextPrayerTime.timeIntervalSince(currentPrayerTime)
             let elapsedInterval = currentTime.timeIntervalSince(currentPrayerTime)
             let progress = max(0, min(1, elapsedInterval / totalInterval))
-
+            
             currentPrayer = nextPrayerIndex > 0 ? prayerTimes[nextPrayerIndex - 1].name : "Isha"
-
+            
             let remainingSecondsTotal = Int(nextPrayerTime.timeIntervalSince(currentTime))
             if remainingSecondsTotal <= 0 {
                 timeRemaining = "0 secs"
@@ -176,7 +176,7 @@ class PrayerTimesViewModel: ObservableObject {
                 let hrs = remainingSecondsTotal / 3600
                 let mins = (remainingSecondsTotal % 3600) / 60
                 let secs = remainingSecondsTotal % 60
-
+                
                 if hrs > 0 {
                     timeRemaining = hrs > 1
                     ? "\(hrs) hrs \(mins) mins"
@@ -192,7 +192,7 @@ class PrayerTimesViewModel: ObservableObject {
                 }
             }
             timeRemaining += " until \(nextPrayer.name)"
-
+            
             DispatchQueue.main.async {
                 self.currentPrayer = currentPrayer
                 self.timeRemaining = timeRemaining
@@ -205,9 +205,9 @@ class PrayerTimesViewModel: ObservableObject {
             let totalInterval = fajrTomorrow.timeIntervalSince(lastPrayerTime)
             let elapsedInterval = currentTime.timeIntervalSince(lastPrayerTime)
             let progress = max(0, min(1, elapsedInterval / totalInterval))
-
+            
             currentPrayer = "Isha"
-
+            
             let remainingSecondsTotal = Int(fajrTomorrow.timeIntervalSince(currentTime))
             if remainingSecondsTotal <= 0 {
                 timeRemaining = "0 secs"
@@ -215,7 +215,7 @@ class PrayerTimesViewModel: ObservableObject {
                 let hrs = remainingSecondsTotal / 3600
                 let mins = (remainingSecondsTotal % 3600) / 60
                 let secs = remainingSecondsTotal % 60
-
+                
                 if hrs > 0 {
                     timeRemaining = hrs > 1
                     ? "\(hrs) hrs \(mins) mins"
@@ -231,7 +231,7 @@ class PrayerTimesViewModel: ObservableObject {
                 }
             }
             timeRemaining += " until Fajr"
-
+            
             DispatchQueue.main.async {
                 self.currentPrayer = currentPrayer
                 self.timeRemaining = timeRemaining

@@ -24,7 +24,7 @@ struct TrackerView: View {
             )
             
             Spacer().frame(height: 20)
-
+            
             // Moved PrayerTimesListView
             PrayerTimesListView(viewModel: viewModel)
             
@@ -34,7 +34,7 @@ struct TrackerView: View {
                 .padding(.vertical, 8)
                 .background(
                     RoundedRectangle(cornerRadius: 10)
-                        // Match prayer list background color or gradient
+                    // Match prayer list background color or gradient
                         .fill(Color(.systemBackground).opacity(0.05))
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)

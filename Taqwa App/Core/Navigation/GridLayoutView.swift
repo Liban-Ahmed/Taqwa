@@ -31,13 +31,13 @@ struct GridLayoutView: View {
             
             // Learn
             NavigationLink(destination: LearnView()) {
-                            GridCard(
-                                title: "Learn",
-                                iconName: "book.fill",
-                                color: .green,
-                                description: "Islamic teachings"
-                            )
-                        }
+                GridCard(
+                    title: "Learn",
+                    iconName: "book.fill",
+                    color: .green,
+                    description: "Islamic teachings"
+                )
+            }
             
             // Qibla
             Button {

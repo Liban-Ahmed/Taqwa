@@ -65,7 +65,7 @@ struct LoadingView<Content: View>: View {
                                 .shadow(color: .white.opacity(0.5), radius: 10)
                         }
                         
-                       
+                        
                     }
                 }
                 .transition(.opacity.combined(with: .scale))
