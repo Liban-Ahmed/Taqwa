@@ -10,6 +10,7 @@ import Combine
 import CoreLocation
 import CoreMotion
 import Adhan
+import UIKit
 
 class QiblaDirectionViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     // MARK: - Published Properties
@@ -109,6 +110,7 @@ class QiblaDirectionViewModel: NSObject, ObservableObject, CLLocationManagerDele
     }
     
     // MARK: - Heading Updates
+    // MARK: - Heading Updates
     func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
         guard newHeading.headingAccuracy >= 0 else {
             calibrationRequired = true
@@ -130,12 +132,27 @@ class QiblaDirectionViewModel: NSObject, ObservableObject, CLLocationManagerDele
         // 4) Figure out how far from Qibla we are
         let desiredArrowAngle = (qiblaBearing - deviceHeading).truncatingRemainder(dividingBy: 360)
         
+        // Before updating arrowAngle, check if we were previously within ±10°.
+        // We'll compare oldAngle vs. newAngle to see if we "enter" the facing range.
+        let oldAngle = arrowAngle
+        let wasFacingQibla = abs(reduceTo180(oldAngle)) < 10
+        
         // 5) Smoothly rotate arrowAngle to the desired angle
         let angleChange = deltaAngle(currentAngle: arrowAngle, targetAngle: desiredArrowAngle)
+        
         withAnimation(.easeOut(duration: 0.3)) {
             arrowAngle += angleChange
         }
+        
+        // After updating arrowAngle, check if we are now within ±10°.
+        let isFacingQibla = abs(reduceTo180(arrowAngle)) < 10
+        
+        // If we just crossed into the "Facing Qibla" range, trigger haptic feedback.
+        if !wasFacingQibla && isFacingQibla {
+            provideHapticFeedback()
+        }
     }
+
     
     // MARK: - Error Handling
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
@@ -236,4 +253,19 @@ class QiblaDirectionViewModel: NSObject, ObservableObject, CLLocationManagerDele
     }
     
 
+    private func provideHapticFeedback() {
+        let generator = UIImpactFeedbackGenerator(style: .heavy)
+        generator.prepare()        // Prepares the Taptic Engine
+        generator.impactOccurred() // Fires the haptic
+    }
+    /// Helper: reduce any angle into [-180, 180].
+    private func reduceTo180(_ angle: Double) -> Double {
+        var result = angle.truncatingRemainder(dividingBy: 360)
+        if result > 180 {
+            result -= 360
+        } else if result < -180 {
+            result += 360
+        }
+        return result
+    }
 }
