@@ -38,4 +38,5 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         onLocationUpdate?(location)
         locationManager.stopUpdatingLocation()
     }
+    
 }

@@ -12,18 +12,39 @@ import Combine
 struct QiblaView: View {
     @StateObject private var viewModel = QiblaDirectionViewModel()
     
-    private var adjustedBearing: Double {
-        let rawDifference = viewModel.qiblaBearing - viewModel.deviceHeading
-        let normalized = rawDifference.truncatingRemainder(dividingBy: 360)
-        return normalized
+    // A helper that returns arrowAngle in [-180, 180] or [0..360], whichever you prefer
+    private var adjustedAngle: Double {
+        // Keep the angle in [-180, 180] for easy "Turn Left/Right" logic
+        var angle = viewModel.arrowAngle.truncatingRemainder(dividingBy: 360)
+        if angle > 180 { angle -= 360 }
+        if angle < -180 { angle += 360 }
+        return angle
+    }
+    
+    private var isFacingQibla: Bool {
+        abs(adjustedAngle) < 10
+    }
+    
+    private var directionText: String {
+        if isFacingQibla {
+            return "Facing Qibla"
+        } else {
+            // If angle is negative, Qibla is to your left; if positive, it's to your right
+            return adjustedAngle < 0 ? "Turn Left" : "Turn Right"
+        }
+    }
+    
+    private var angleDegrees: Int {
+        Int(abs(adjustedAngle))
     }
     
     var body: some View {
         ZStack {
-            // Background
-            Color(abs(adjustedBearing) < 10 ? .green : .gray)
+            // If we’re within ±10°, use green; otherwise gray
+            Color(isFacingQibla ? .green : .gray)
                 .ignoresSafeArea()
-                .animation(.easeInOut(duration: 0.5), value: adjustedBearing)
+                // Animate color changes over 0.5s
+                .animation(.easeInOut(duration: 0.5), value: isFacingQibla)
             
             VStack(spacing: 30) {
                 // Location Title
@@ -36,29 +57,22 @@ struct QiblaView: View {
                 
                 // Central Qibla Direction Indicator
                 ZStack {
-                    // Main arrow
                     Image(systemName: "arrow.up")
                         .resizable()
                         .foregroundColor(.white)
                         .frame(width: 250, height: 250)
                         .shadow(color: .white.opacity(0.8), radius: 2)
-                        .rotationEffect(.degrees(adjustedBearing))
-                        .animation(
-                            .interpolatingSpring(
-                                mass: 1.0,
-                                stiffness: 50,
-                                damping: 8,
-                                initialVelocity: 0
-                            ),
-                            value: adjustedBearing
-                        )
+                        // Rotate using arrowAngle directly
+                        .rotationEffect(.degrees(viewModel.arrowAngle))
                 }
+                // We do NOT add extra .animation here because we already animate in the ViewModel
+                // If you want a slight “extra” effect, you can add it, but it can cause double-animations.
                 
                 // Bearing Info
-                Text("\(Int(abs(adjustedBearing.truncatingRemainder(dividingBy: 360))))° \(abs(adjustedBearing.truncatingRemainder(dividingBy: 360)) < 10 ? "Facing Qibla" : (adjustedBearing < 0 ? "Turn Left" : "Turn Right"))")
-                                    .font(.system(size: 20, weight: .semibold))
-                                    .foregroundColor(.white)
-                                    .padding(.top, 20)
+                Text("\(angleDegrees)° \(directionText)")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(.white)
+                    .padding(.top, 20)
                 
                 Spacer()
                 
