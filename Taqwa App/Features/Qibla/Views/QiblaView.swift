@@ -4,7 +4,12 @@
 //
 //  Created by Liban Ahmed on 12/31/24.
 //
-
+//
+//  QiblaView.swift
+//  Qibla Direction App
+//
+//  Created by Liban Ahmed on 12/31/24.
+//
 import SwiftUI
 import CoreLocation
 import Combine
@@ -12,117 +17,69 @@ import Combine
 struct QiblaView: View {
     @StateObject private var viewModel = QiblaDirectionViewModel()
     
-    // Track scenePhase if you want to stop/resume updates
-    @Environment(\.scenePhase) private var scenePhase
-    
-    // If you want a haptic tap when user gets within certain alignment
-    private let hapticFeedback = UIImpactFeedbackGenerator(style: .medium)
-    private let alignmentThreshold: Double = 8.0
+    private var adjustedBearing: Double {
+        let rawDifference = viewModel.qiblaBearing - viewModel.deviceHeading
+        let normalized = rawDifference.truncatingRemainder(dividingBy: 360)
+        return normalized
+    }
     
     var body: some View {
-        
-        // 1) Decide background color: dark or green?
-        //    If user is “close enough” to Qibla, you might show green, else dark.
-        let isClose = abs(viewModel.relativeAngle) < alignmentThreshold
-        let backgroundColor = isClose ? Color.green : Color.black
-        
         ZStack {
-            backgroundColor
+            // Background
+            Color(abs(adjustedBearing) < 10 ? .green : .gray)
                 .ignoresSafeArea()
+                .animation(.easeInOut(duration: 0.5), value: adjustedBearing)
             
-            VStack {
-                // 2) Top bar / location label
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("LOCATION")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(Color.white.opacity(0.7))
-                        .padding(.bottom, 2)
-                    
-                    Text(viewModel.locationName) // e.g. "809 Bay Dr"
-                        .font(.system(size: 26, weight: .bold))
-                        .foregroundColor(.white)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding([.leading, .top], 24)
+            VStack(spacing: 30) {
+                // Location Title
+                Text(viewModel.locationName)
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(.top, 50)
                 
                 Spacer()
                 
-                // 3) Compass: big arrow + partial arc
-                CompassView(
-                    deviceHeading: viewModel.deviceHeading,
-                    qiblaBearing: viewModel.qiblaBearing
-                )
-                .frame(width: 250, height: 250)
-                
-                // 4) Degrees + direction text
-                //    "153°" + "to your left" or "slight left" etc.
-                VStack(spacing: 4) {
-                    // Convert the numeric angle to Int or keep Double with 0 decimals
-                    let angleText = String(format: "%.0f°", viewModel.relativeAngle)
-                    
-                    Text(angleText)
-                        .font(.system(size: 40, weight: .bold))
+                // Central Qibla Direction Indicator
+                ZStack {
+                    // Main arrow
+                    Image(systemName: "arrow.up")
+                        .resizable()
                         .foregroundColor(.white)
-                    
-                    Text(viewModel.directionHint) // "to your left", "slight left", etc.
-                        .font(.system(size: 26, weight: .regular))
-                        .foregroundColor(Color.white.opacity(0.8))
+                        .frame(width: 250, height: 250)
+                        .shadow(color: .white.opacity(0.8), radius: 2)
+                        .rotationEffect(.degrees(adjustedBearing))
+                        .animation(
+                            .interpolatingSpring(
+                                mass: 1.0,
+                                stiffness: 50,
+                                damping: 8,
+                                initialVelocity: 0
+                            ),
+                            value: adjustedBearing
+                        )
                 }
-                .padding(.top, 16)
+                
+                // Bearing Info
+                Text("\(Int(abs(adjustedBearing.truncatingRemainder(dividingBy: 360))))° \(abs(adjustedBearing.truncatingRemainder(dividingBy: 360)) < 10 ? "Facing Qibla" : (adjustedBearing < 0 ? "Turn Left" : "Turn Right"))")
+                                    .font(.system(size: 20, weight: .semibold))
+                                    .foregroundColor(.white)
+                                    .padding(.top, 20)
                 
                 Spacer()
                 
-                // 5) Bottom bar with phone icon & heart icon
-                HStack {
-                    // Left icon (could be phone rotation instructions)
-                    Button(action: {
-                        // Possibly call viewModel.startCalibration() or show info
-                    }) {
-                        Image(systemName: "iphone.radiowaves.left.and.right")
-                            .font(.system(size: 28))
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Circle().fill(Color.black.opacity(0.2)))
-                    }
+                // Location Info
+                VStack(spacing: 5) {
+                    Text(viewModel.locationStatus)
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(.white.opacity(0.7))
                     
-                    Spacer()
-                    
-                    // Right icon (could be a favorite or "like")
-                    Button(action: {
-                        // Your logic here
-                    }) {
-                        Image(systemName: "heart")
-                            .font(.system(size: 28))
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Circle().fill(Color.black.opacity(0.2)))
-                    }
+                    Text("Your Location: \(viewModel.locationName)")
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(.white.opacity(0.7))
                 }
-                .padding([.leading, .trailing, .bottom], 24)
+                .padding(.bottom, 30)
             }
         }
-        .onAppear {
-            viewModel.resumeUpdates()
-        }
-        .onDisappear {
-            viewModel.stopAllUpdates()
-        }
-        .onChange(of: scenePhase) { newPhase in
-            switch newPhase {
-            case .active:
-                viewModel.resumeUpdates()
-            case .inactive, .background:
-                viewModel.stopAllUpdates()
-            @unknown default:
-                break
-            }
-        }
-        // 6) Haptic feedback if user crosses alignment threshold
-        .onChange(of: isClose) { newValue in
-            if newValue {
-                hapticFeedback.prepare()
-                hapticFeedback.impactOccurred(intensity: 0.7)
-            }
-        }
+        .navigationBarHidden(true)
     }
 }
