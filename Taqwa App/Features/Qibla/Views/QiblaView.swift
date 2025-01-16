@@ -57,23 +57,32 @@ struct QiblaView: View {
                 
                 // Central Qibla Direction Indicator
                 ZStack {
+                    // A subtle disc
+                    Circle()
+                        .strokeBorder(Color.white.opacity(0.2), lineWidth: 2)
+                        .frame(width: 300, height: 300)
+
+                    // Cardinal markers (N, E, S, W)
+                    ForEach(0..<4) { index in
+                        let labels = ["N", "E", "S", "W"]
+                        let angle = Double(index) * 90.0
+                        Text(labels[index])
+                            .foregroundColor(.white.opacity(0.7))
+                            .rotationEffect(.degrees(-angle)) // Keep text upright
+                            .offset(x: 0, y: -140) // position label on circle
+                            .rotationEffect(.degrees(angle))
+                    }
+
+                    // Arrow
                     Image(systemName: "arrow.up")
                         .resizable()
                         .foregroundColor(.white)
-                        .frame(width: 250, height: 250)
+                        .frame(width: 150, height: 150)
                         .shadow(color: .white.opacity(0.8), radius: 2)
-                        // Rotate using arrowAngle directly
                         .rotationEffect(.degrees(viewModel.arrowAngle))
                 }
-                // We do NOT add extra .animation here because we already animate in the ViewModel
-                // If you want a slight “extra” effect, you can add it, but it can cause double-animations.
-                
-                // Bearing Info
-                Text("\(angleDegrees)° \(directionText)")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(.white)
-                    .padding(.top, 20)
-                
+                .frame(width: 300, height: 300)
+
                 Spacer()
                 
                 // Location Info

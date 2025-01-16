@@ -219,4 +219,21 @@ class QiblaDirectionViewModel: NSObject, ObservableObject, CLLocationManagerDele
         locationManager.stopUpdatingHeading()
         motionManager.stopDeviceMotionUpdates()
     }
+    private func directionLabel(for angle: Double) -> String {
+        let absAngle = abs(angle)
+        switch absAngle {
+        case 0..<5:
+            return "Facing Qibla"
+        case 5..<20:
+            return angle < 0 ? "Slight Left" : "Slight Right"
+        case 20..<45:
+            return angle < 0 ? "Turn Left" : "Turn Right"
+        case 45..<135:
+            return angle < 0 ? "Keep Turning Left" : "Keep Turning Right"
+        default:
+            return "Behind You"
+        }
+    }
+    
+
 }
