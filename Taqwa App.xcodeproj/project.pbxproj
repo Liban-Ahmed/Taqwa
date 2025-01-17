@@ -42,7 +42,6 @@
 				"Features/Learn/Views/Learn Page.png",
 				Features/Learn/Views/LessonView1.png,
 				Features/Learn/Views/quizView.png,
-				"Views/PNG image.png",
 			);
 			target = DE1975D42D2305F5004977AE /* Taqwa App */;
 		};
