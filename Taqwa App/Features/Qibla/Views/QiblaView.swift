@@ -38,42 +38,60 @@ struct QiblaView: View {
         Int(abs(adjustedAngle))
     }
     
+    
     var body: some View {
         ZStack {
-            // If we’re within ±10°, use green; otherwise gray
+            // Dynamic gradient background instead of solid color
             Color(isFacingQibla ? .green : .gray)
                 .ignoresSafeArea()
-            // Animate color changes over 0.5s
-                .animation(.easeInOut(duration: 0.5), value: isFacingQibla)
             
             VStack(spacing: 30) {
-                // Location Title
-                Text(viewModel.locationName)
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundColor(.white)
-                    .padding(.top, 50)
+                // Enhanced Location Header
+                VStack(spacing: 8) {
+                    Text(viewModel.locationName)
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundColor(.white)
+                    
+                    // Direction Text with dynamic styling
+                    Text(directionText)
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(isFacingQibla ? .white : .white.opacity(0.9))
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(
+                            Capsule()
+                                .fill(isFacingQibla ? Color.green.opacity(0.3) : Color.white.opacity(0.1))
+                        )
+                }
+                .padding(.top, 50)
                 
                 Spacer()
                 
-                // Central Qibla Direction Indicator
+                // Compass Container
                 ZStack {
-                    // A subtle disc
+                    // Outer ring
                     Circle()
-                        .strokeBorder(Color.white.opacity(0.2), lineWidth: 2)
-                        .frame(width: 300, height: 300)
+                        .strokeBorder(Color.white.opacity(0.3), lineWidth: 3)
+                        .frame(width: 320, height: 320)
                     
-                    // Cardinal markers (N, E, S, W)
+                    // Inner ring
+                    Circle()
+                        .strokeBorder(Color.white.opacity(0.2), lineWidth: 1)
+                        .frame(width: 280, height: 280)
+                    
+                    // Cardinal markers with improved styling
                     ForEach(0..<4) { index in
                         let labels = ["N", "E", "S", "W"]
                         let angle = Double(index) * 90.0
                         Text(labels[index])
-                            .foregroundColor(.white.opacity(0.7))
-                            .rotationEffect(.degrees(-angle)) // Keep text upright
-                            .offset(x: 0, y: -140) // position label on circle
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.white.opacity(0.8))
+                            .rotationEffect(.degrees(-angle))
+                            .offset(x: 0, y: -150)
                             .rotationEffect(.degrees(angle))
                     }
                     
-                    // Arrow
+                    // Existing Arrow (unchanged)
                     Image(systemName: "arrow.up")
                         .resizable()
                         .foregroundColor(.white)
@@ -81,21 +99,31 @@ struct QiblaView: View {
                         .shadow(color: .white.opacity(0.8), radius: 2)
                         .rotationEffect(.degrees(viewModel.arrowAngle))
                 }
-                .frame(width: 300, height: 300)
+                .frame(width: 320, height: 320)
                 
                 Spacer()
                 
-                // Location Info
-                VStack(spacing: 5) {
-                    Text(viewModel.locationStatus)
-                        .font(.system(size: 14, weight: .regular))
-                        .foregroundColor(.white.opacity(0.7))
+                // Enhanced Status Footer
+                VStack(spacing: 12) {
+                    // Accuracy indicator
+                    HStack(spacing: 8) {
+                        Circle()
+                            .fill(isFacingQibla ? Color.green : Color.white.opacity(0.5))
+                            .frame(width: 8, height: 8)
+                        Text(viewModel.locationStatus)
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundColor(.white.opacity(0.9))
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(Color.white.opacity(0.1))
+                    .cornerRadius(20)
                     
                     Text("Your Location: \(viewModel.locationName)")
-                        .font(.system(size: 14, weight: .regular))
+                        .font(.system(size: 14))
                         .foregroundColor(.white.opacity(0.7))
                 }
-                .padding(.bottom, 30)
+                .padding(.bottom, 40)
             }
         }
         .navigationBarHidden(true)
