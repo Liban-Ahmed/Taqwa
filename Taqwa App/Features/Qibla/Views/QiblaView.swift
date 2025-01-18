@@ -42,8 +42,16 @@ struct QiblaView: View {
     var body: some View {
         ZStack {
             // Dynamic gradient background instead of solid color
-            Color(isFacingQibla ? .green : .gray)
-                .ignoresSafeArea()
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    isFacingQibla ? Color.green.opacity(0.6) : Color.gray.opacity(0.6),
+                    isFacingQibla ? Color.green.opacity(0.3) : Color.gray.opacity(0.3)
+                ]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            .animation(.easeInOut(duration: 0.5), value: isFacingQibla)
             
             VStack(spacing: 30) {
                 // Enhanced Location Header
