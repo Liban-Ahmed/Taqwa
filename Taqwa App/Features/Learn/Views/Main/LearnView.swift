@@ -5,13 +5,10 @@
 //  Created by Liban Ahmed on 1/4/25.
 //
 import SwiftUI
-import SwiftUI
 
 struct LearnView: View {
-    // In a real app, you’d likely use an EnvironmentObject or other injection.
-    // For now, we’ll just create our fake manager here for demonstration.
+    // Example progress manager for demonstration (replace with real logic if needed)
     @StateObject private var progressManager = FakeProgressManager()
-    
     @StateObject private var viewModel = LearnViewModel()
     @Environment(\.dismiss) private var dismiss
     
@@ -31,20 +28,21 @@ struct LearnView: View {
                 
                 VStack(spacing: 0) {
                     headerSection
-                    progressSummaryCard // <–– Our new progress UI
+                    progressSummaryCard
                     
                     ScrollView(showsIndicators: false) {
                         moduleGrid
                     }
-                    .padding(.top, 8) // small spacing above the grid
+                    .padding(.top, 8)
                 }
             }
             .navigationBarBackButtonHidden(true)
             .toolbar {
+                // Custom Back Button
                 ToolbarItem(placement: .topBarLeading) {
                     backButton
                 }
-                // You can add a trailing button for achievements or profile if you want:
+                // (Optional) Profile or Achievements Button
                 /*
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink(destination: ProfileView()) {
@@ -61,25 +59,39 @@ struct LearnView: View {
         }
     }
     
+    // MARK: - Header
     private var headerSection: some View {
-        VStack(spacing: 8) {
-            Text("Islamic Learning")
-                .font(.system(size: 30, weight: .black, design: .rounded))
-                .foregroundColor(.white)
-            
-            Text("Explore and enhance your knowledge")
-                .font(.system(size: 16))
-                .foregroundColor(.white.opacity(0.8))
+        ZStack {
+            // Subtle overlay behind the text
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color.black.opacity(0.3),
+                    Color.clear
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .frame(height: 120)
+            .overlay(
+                VStack(spacing: 4) {
+                    Text("Islamic Learning")
+                        .font(.system(size: 32, weight: .heavy, design: .rounded))
+                        .foregroundColor(.white)
+                    
+                    Text("Explore and enhance your knowledge")
+                        .font(.system(size: 16))
+                        .foregroundColor(.white.opacity(0.9))
+                }
+                .padding(.top, 20)
+            )
         }
-        .padding(.vertical, 24)
-        .frame(maxWidth: .infinity)
-        .background(.ultraThinMaterial.opacity(0.4))
+        .frame(maxWidth: .infinity, minHeight: 120)
+        .background(.ultraThinMaterial.opacity(0.3))
     }
     
     // MARK: - Progress Summary Card
     private var progressSummaryCard: some View {
         VStack(spacing: 12) {
-            // Example: Show total points, streak, and module completion
             HStack {
                 // Points
                 VStack(spacing: 4) {
@@ -118,8 +130,8 @@ struct LearnView: View {
             .padding(.vertical, 12)
             .padding(.horizontal, 20)
             
-            // Simple progress bar for modules completion
-            ProgressView(value: Double(progressManager.completedModules), total: Double(progressManager.totalModules))
+            ProgressView(value: Double(progressManager.completedModules),
+                         total: Double(progressManager.totalModules))
                 .progressViewStyle(LinearProgressViewStyle(tint: .white))
                 .frame(height: 6)
                 .clipShape(Capsule())
@@ -131,6 +143,7 @@ struct LearnView: View {
         .padding(.top, 8)
     }
     
+    // MARK: - Module Grid
     private var moduleGrid: some View {
         LazyVGrid(
             columns: [
@@ -140,19 +153,23 @@ struct LearnView: View {
             spacing: 16
         ) {
             ForEach(viewModel.modules) { module in
-                NavigationLink(destination: ModuleDetailView(module: module)) {
+                NavigationLink {
+                    ModuleDetailView(module: module)
+                } label: {
                     ModuleCard(
                         module: module,
                         completedLessons: viewModel.getCompletedLessonsCount(for: module),
                         totalLessons: module.lessons.count
                     )
                 }
+                // Removes default blue highlight, keeps your custom card design
+                .buttonStyle(.plain)
             }
         }
         .padding(16)
     }
     
-    
+    // MARK: - Custom Back Button
     private var backButton: some View {
         Button(action: { dismiss() }) {
             HStack(spacing: 4) {
@@ -166,14 +183,12 @@ struct LearnView: View {
     }
 }
 
-
+// MARK: - ModuleCard
 struct ModuleCard: View {
     let module: Module
     @Environment(\.colorScheme) private var colorScheme
-    @State private var isPressed = false
     
     // Example of lessons completed for this module
-    // In real usage, you’d fetch or calculate the user’s progress for each module
     let completedLessons: Int
     let totalLessons: Int
     
@@ -215,7 +230,7 @@ struct ModuleCard: View {
                 
                 Spacer()
                 
-                // Simple ring or bar if you like
+                // Circular progress for lessons
                 LessonProgressView(progress: progress)
                     .frame(width: 24, height: 24)
             }
@@ -231,21 +246,10 @@ struct ModuleCard: View {
                     radius: 8, x: 0, y: 2
                 )
         )
-        .scaleEffect(isPressed ? 0.98 : 1)
-        .animation(.easeOut(duration: 0.2), value: isPressed)
-        .onTapGesture {
-            // Provide tactile feedback if desired
-            withAnimation {
-                isPressed = true
-            }
-            // Small delay before resetting
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                isPressed = false
-            }
-        }
     }
 }
 
+// MARK: - LessonProgressView
 struct LessonProgressView: View {
     let progress: Double
     
