@@ -12,4 +12,8 @@ class LearnViewModel: ObservableObject {
     func loadModules() {
         modules = LearningDataManager.shared.loadModules()
     }
+    func getCompletedLessonsCount(for module: Module) -> Int {
+           // Return the actual completed lesson count, e.g., 0 for now
+           return 0
+       }
 }
