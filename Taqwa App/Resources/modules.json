@@ -1,29 +1,123 @@
 {
-    "modules": [
+  "modules": [
+    {
+      "id": 1,
+      "title": "Introduction to Islam",
+      "description": "Learn the fundamental beliefs and practices in Islam with references from the Quran and authentic Hadith.",
+      "lessons": [
         {
-            "id": 1,
-            "title": "Introduction to Islam",
-            "description": "Learn the fundamentals of Islam",
-            "lessons": [
-                {
-                    "id": 1,
-                    "title": "The Five Pillars",
-                    "text": "The five pillars of Islam are the foundation of Muslim life. They are: Shahada (Declaration of Faith), Salah (Prayer), Zakat (Charity), Sawm (Fasting), and Hajj (Pilgrimage).",
-                    "audioFileName": "five_pillars_audio",
-                    "quizQuestions": [
-                        {
-                            "id": 1,
-                            "question": "What are the five pillars of Islam?",
-                            "options": [
-                                "Prayer, Fasting, Charity, Hajj",
-                                "Shahada, Prayer, Zakat, Fasting, Hajj",
-                                "Prayer, Reading Quran, Charity, Fasting"
-                            ],
-                            "correctIndex": 1
-                        }
-                    ]
-                }
-            ]
+          "id": 1,
+          "title": "The Five Pillars of Islam",
+          "text": "Islam is built on five pillars that act as the foundational acts of worship. They are:\n\n1. Shahada (Declaration of Faith): Bearing witness that there is no deity worthy of worship except Allah, and that Muhammad (ﷺ) is His messenger.\n2. Salah (Prayer): Observing the five daily prayers at their prescribed times. The Quran states, 'Indeed, prayer has been decreed upon the believers a decree of specified times' (Qur’an 4:103).\n3. Zakat (Charity): Giving a fixed portion of one’s wealth to the needy. The Prophet (ﷺ) said, 'Charity does not decrease wealth' (Muslim).\n4. Sawm (Fasting): Abstaining from food, drink, and marital relations from dawn to sunset during the month of Ramadan.\n5. Hajj (Pilgrimage): Performing the pilgrimage to Makkah at least once in a lifetime if one is able.\n\nThese pillars shape a Muslim’s daily life and spiritual connection with Allah. They are not merely rituals but expressions of faith, discipline, and compassion for humanity.",
+          "audioFileName": "five_pillars_intro_audio.mp3",
+          "quizQuestions": [
+            {
+              "id": 1,
+              "question": "Which of the following are the Five Pillars of Islam?",
+              "options": [
+                "Shahada, Prayer, Zakat, Fasting, Hajj",
+                "Prayer, Reading the Quran, Charity, Kindness, Pilgrimage",
+                "Belief in angels, Fasting, Patience, Charity, Prayer"
+              ],
+              "correctIndex": 0
+            },
+            {
+              "id": 2,
+              "question": "According to authentic Hadith, does giving charity decrease one’s wealth?",
+              "options": [
+                "Yes, it reduces the wealth one has",
+                "No, it does not decrease wealth",
+                "It depends on how much you give"
+              ],
+              "correctIndex": 1
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "The Six Articles of Faith",
+          "text": "A Muslim’s belief system is rooted in six core articles of faith:\n\n1. Belief in Allah: The One and Only God, without partner or equal.\n2. Belief in the angels: Created by Allah from light, they dutifully carry out His commands.\n3. Belief in the revealed books: Such as the Torah, the Gospel, and especially the Quran, Allah’s final revelation.\n4. Belief in the prophets: From Adam to Muhammad (ﷺ), they conveyed Allah’s guidance.\n5. Belief in the Day of Judgment: All of mankind will be held accountable for their deeds.\n6. Belief in Qadr (Divine Decree): Everything happens by Allah’s will and wisdom.\n\nThe Quran says, 'The Messenger has believed in what was revealed to him from his Lord, and so have the believers. All of them have believed in Allah and His angels and His books and His messengers…' (Qur’an 2:285). Understanding these articles fosters a strong, coherent worldview and provides moral guidance.",
+          "audioFileName": "six_articles_audio.mp3",
+          "quizQuestions": [
+            {
+              "id": 1,
+              "question": "Which of the following is NOT one of the Six Articles of Faith?",
+              "options": [
+                "Belief in Allah",
+                "Belief in angels",
+                "Belief in the Holy Trinity",
+                "Belief in the Day of Judgment"
+              ],
+              "correctIndex": 2
+            },
+            {
+              "id": 2,
+              "question": "What does 'Qadr' refer to in Islam?",
+              "options": [
+                "Predestination or Divine Decree",
+                "Compulsory Charity",
+                "Pilgrimage to Makkah"
+              ],
+              "correctIndex": 0
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "Etiquettes and Character",
+          "text": "Islam places great emphasis on good character (akhlaq). The Prophet Muhammad (ﷺ) said, 'I was only sent to perfect good character' (Al-Bukhari).\n\nKey Islamic etiquettes include:\n- Greeting others with peace (As-Salamu Alaikum).\n- Speaking truthfully and kindly.\n- Maintaining cleanliness and modesty in appearance.\n- Respecting parents, relatives, and neighbors.\n\nFollowing these etiquettes is a form of worship itself, reflecting sincerity and piety. The Quran also reminds us, 'Speak to people good [words]' (Qur’an 2:83).",
+          "audioFileName": "etiquettes_character_audio.mp3",
+          "quizQuestions": [
+            {
+              "id": 1,
+              "question": "Which statement did the Prophet (ﷺ) say about his mission?",
+              "options": [
+                "To introduce a new faith unknown to previous prophets",
+                "To perfect good character",
+                "To conquer all lands"
+              ],
+              "correctIndex": 1
+            },
+            {
+              "id": 2,
+              "question": "True or False: Showing kindness to neighbors is not emphasized in Islam.",
+              "options": [
+                "True",
+                "False"
+              ],
+              "correctIndex": 1
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "title": "Quranic Preservation & Recitation",
+          "text": "Muslims believe the Quran to be the final revelation from Allah, preserved and unchanged since its revelation to Prophet Muhammad (ﷺ). The Quran states, 'Indeed, it is We who sent down the Quran, and indeed, We will be its guardian' (Qur’an 15:9).\n\nProper recitation (tajwid) is highly encouraged, ensuring that each letter is pronounced correctly. Reciting the Quran brings spiritual tranquility; as the Prophet (ﷺ) stated, 'The best among you are those who learn the Quran and teach it' (Al-Bukhari).",
+          "audioFileName": "quran_preservation_audio.mp3",
+          "quizQuestions": [
+            {
+              "id": 1,
+              "question": "Which verse assures the preservation of the Quran?",
+              "options": [
+                "Qur’an 2:255",
+                "Qur’an 15:9",
+                "Qur’an 96:1"
+              ],
+              "correctIndex": 1
+            },
+            {
+              "id": 2,
+              "question": "According to hadith, who are considered the best among Muslims?",
+              "options": [
+                "Those who have the most wealth",
+                "Those who recite poetry beautifully",
+                "Those who learn the Quran and teach it"
+              ],
+              "correctIndex": 2
+            }
+          ]
         }
-    ]
+      ]
+    }
+  ]
 }
