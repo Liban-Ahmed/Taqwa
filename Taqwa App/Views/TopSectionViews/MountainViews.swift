@@ -21,89 +21,89 @@ struct MountainRangeView: View {
     }
 }
 
-//struct BackMountainView: View {
-//    let currentPrayer: String
-//    
-//    var body: some View {
-//        GeometryReader { geo in
-//            let w = geo.size.width
-//            let h = geo.size.height
-//            
-//            ZStack {
-//                Path { path in
-//                    path.move(to: CGPoint(x: 0, y: h * 0.8))
-//                    path.addLine(to: CGPoint(x: w * 0.4, y: h * 0.2))
-//                    path.addLine(to: CGPoint(x: w * 0.7, y: h * 0.4))
-//                    path.addLine(to: CGPoint(x: w, y: h * 0.1))
-//                    path.addLine(to: CGPoint(x: w, y: h))
-//                    path.addLine(to: CGPoint(x: 0, y: h))
-//                    path.closeSubpath()
-//                }
-//                .fill(
-//                    LinearGradient(
-//                        gradient: Gradient(colors: [
-//                            mountainBaseColor(for: currentPrayer),
-//                            mountainPeakColor(for: currentPrayer)
-//                        ]),
-//                        startPoint: .bottom,
-//                        endPoint: .top
-//                    )
-//                )
-//                
-//                // Snow cap
-//                Path { path in
-//                    path.move(to: CGPoint(x: w * 0.32, y: h * 0.28))
-//                    path.addLine(to: CGPoint(x: w * 0.4, y: h * 0.2))
-//                    path.addLine(to: CGPoint(x: w * 0.45, y: h * 0.25))
-//                    path.closeSubpath()
-//                }
-//                .fill(Color.white.opacity(0.5))
-//            }
-//        }
-//    }
-//}
-//
-//struct FrontMountainView: View {
-//    let currentPrayer: String
-//    
-//    var body: some View {
-//        GeometryReader { geo in
-//            let w = geo.size.width
-//            let h = geo.size.height
-//            
-//            ZStack {
-//                Path { path in
-//                    path.move(to: CGPoint(x: 0, y: h * 0.7))
-//                    path.addLine(to: CGPoint(x: w * 0.3, y: h * 0.3))
-//                    path.addLine(to: CGPoint(x: w * 0.6, y: h * 0.5))
-//                    path.addLine(to: CGPoint(x: w, y: h * 0.2))
-//                    path.addLine(to: CGPoint(x: w, y: h))
-//                    path.addLine(to: CGPoint(x: 0, y: h))
-//                    path.closeSubpath()
-//                }
-//                .fill(
-//                    LinearGradient(
-//                        gradient: Gradient(colors: [
-//                            mountainBaseColor(for: currentPrayer).opacity(0.9),
-//                            mountainPeakColor(for: currentPrayer).opacity(0.9)
-//                        ]),
-//                        startPoint: .bottom,
-//                        endPoint: .top
-//                    )
-//                )
-//                
-//                // Ridge snow
-//                Path { path in
-//                    path.move(to: CGPoint(x: w * 0.25, y: h * 0.36))
-//                    path.addLine(to: CGPoint(x: w * 0.3, y: h * 0.3))
-//                    path.addLine(to: CGPoint(x: w * 0.35, y: h * 0.35))
-//                    path.closeSubpath()
-//                }
-//                .fill(Color.white.opacity(0.5))
-//            }
-//        }
-//    }
-//}
+struct BackMountainView: View {
+    let currentPrayer: String
+    
+    var body: some View {
+        GeometryReader { geo in
+            let w = geo.size.width
+            let h = geo.size.height
+            
+            ZStack {
+                Path { path in
+                    path.move(to: CGPoint(x: 0, y: h * 0.8))
+                    path.addLine(to: CGPoint(x: w * 0.4, y: h * 0.2))
+                    path.addLine(to: CGPoint(x: w * 0.7, y: h * 0.4))
+                    path.addLine(to: CGPoint(x: w, y: h * 0.1))
+                    path.addLine(to: CGPoint(x: w, y: h))
+                    path.addLine(to: CGPoint(x: 0, y: h))
+                    path.closeSubpath()
+                }
+                .fill(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            mountainBaseColor(for: currentPrayer),
+                            mountainPeakColor(for: currentPrayer)
+                        ]),
+                        startPoint: .bottom,
+                        endPoint: .top
+                    )
+                )
+                
+                // Snow cap
+                Path { path in
+                    path.move(to: CGPoint(x: w * 0.32, y: h * 0.28))
+                    path.addLine(to: CGPoint(x: w * 0.4, y: h * 0.2))
+                    path.addLine(to: CGPoint(x: w * 0.45, y: h * 0.25))
+                    path.closeSubpath()
+                }
+                .fill(Color.white.opacity(0.5))
+            }
+        }
+    }
+}
+
+struct FrontMountainView: View {
+    let currentPrayer: String
+    
+    var body: some View {
+        GeometryReader { geo in
+            let w = geo.size.width
+            let h = geo.size.height
+            
+            ZStack {
+                Path { path in
+                    path.move(to: CGPoint(x: 0, y: h * 0.7))
+                    path.addLine(to: CGPoint(x: w * 0.3, y: h * 0.3))
+                    path.addLine(to: CGPoint(x: w * 0.6, y: h * 0.5))
+                    path.addLine(to: CGPoint(x: w, y: h * 0.2))
+                    path.addLine(to: CGPoint(x: w, y: h))
+                    path.addLine(to: CGPoint(x: 0, y: h))
+                    path.closeSubpath()
+                }
+                .fill(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            mountainBaseColor(for: currentPrayer).opacity(0.9),
+                            mountainPeakColor(for: currentPrayer).opacity(0.9)
+                        ]),
+                        startPoint: .bottom,
+                        endPoint: .top
+                    )
+                )
+                
+                // Ridge snow
+                Path { path in
+                    path.move(to: CGPoint(x: w * 0.25, y: h * 0.36))
+                    path.addLine(to: CGPoint(x: w * 0.3, y: h * 0.3))
+                    path.addLine(to: CGPoint(x: w * 0.35, y: h * 0.35))
+                    path.closeSubpath()
+                }
+                .fill(Color.white.opacity(0.5))
+            }
+        }
+    }
+}
 
 // Helpers for mountain colors
 func mountainBaseColor(for prayer: String) -> Color {
