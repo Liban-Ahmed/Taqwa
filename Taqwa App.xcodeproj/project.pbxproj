@@ -35,24 +35,9 @@
 		DE223FD62D2455C000A26E59 /* Swift..gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = Swift..gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		DE09DD9E2D33955C007E2C1E /* Exceptions for "Taqwa App" folder in "Taqwa App" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				"Features/Learn/Views/Learn Page.png",
-				Features/Learn/Views/LessonView1.png,
-				Features/Learn/Views/quizView.png,
-			);
-			target = DE1975D42D2305F5004977AE /* Taqwa App */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		DE1975D72D2305F5004977AE /* Taqwa App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				DE09DD9E2D33955C007E2C1E /* Exceptions for "Taqwa App" folder in "Taqwa App" target */,
-			);
 			path = "Taqwa App";
 			sourceTree = "<group>";
 		};
