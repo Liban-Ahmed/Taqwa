@@ -8,6 +8,8 @@ import SwiftUI
 
 struct LessonView: View {
     let lesson: Lesson
+    let module: Module
+    private let progressManager = LearningProgressManager.shared
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     
@@ -63,6 +65,7 @@ struct LessonView: View {
                     .tabViewStyle(.page(indexDisplayMode: .never))
                     .onChange(of: currentPage) { _ in
                         updateProgress()
+                        saveLessonProgress()
                     }
                 }
                 
@@ -80,12 +83,25 @@ struct LessonView: View {
         .overlay(
             Group {
                 if showQuiz {
-                    QuizView(questions: lesson.quizQuestions)
-                        .transition(.opacity)
+                                   QuizView(
+                                       moduleId: module.id,
+                                       lessonId: lesson.id,
+                                       questions: lesson.quizQuestions
+                                   )
+                                   .transition(.opacity)
                 }
             }
         )
     }
+    // Add to existing properties
+    private func saveLessonProgress() {
+        if currentPage == pages.count - 1 {
+            progressManager.markLessonCompleted(moduleId: module.id, lessonId: lesson.id)
+        }
+        progressManager.saveLastPosition(moduleId: module.id, lessonId: lesson.id, page: currentPage)
+    }
+    
+    
     
     private var progressBars: some View {
         HStack(spacing: 4) {

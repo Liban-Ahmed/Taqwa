@@ -8,13 +8,17 @@
 import SwiftUI
 
 struct QuizView: View {
+    let moduleId: Int
+    let lessonId: Int
     let questions: [QuizQuestion]
+    private let progressManager = LearningProgressManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var currentQuestionIndex = 0
     @State private var selectedAnswer: Int?
     @State private var score = 0
     @State private var showScore = false
     @State private var isAnswerLocked = false
+    @State private var wrongAnswers: [QuizProgress.WrongAnswer] = []
     
     var body: some View {
         ZStack {
@@ -273,6 +277,16 @@ struct QuizView: View {
         selectedAnswer = index
         isAnswerLocked = true
         
+        // Track wrong answers
+        if index != questions[currentQuestionIndex].correctIndex {
+            wrongAnswers.append(QuizProgress.WrongAnswer(
+                questionId: questions[currentQuestionIndex].id,
+                selectedAnswer: index,
+                correctAnswer: questions[currentQuestionIndex].correctIndex,
+                timestamp: Date()
+            ))
+        }
+        
         if index == questions[currentQuestionIndex].correctIndex {
             score += 1
         }
@@ -289,12 +303,24 @@ struct QuizView: View {
                     isAnswerLocked = false
                 }
             } else {
+                finishQuiz()
                 withAnimation {
                     showScore = true
                 }
             }
         }
     }
+    private func finishQuiz() {
+        let percentage = Double(score) / Double(questions.count)
+        progressManager.saveQuizProgress(
+            moduleId: moduleId,
+            lessonId: lessonId,
+            score: Int(percentage * 100),
+            wrongAnswers: wrongAnswers
+        )
+    }
+    
+    
     
     private func resetQuiz() {
         currentQuestionIndex = 0
@@ -302,6 +328,37 @@ struct QuizView: View {
         score = 0
         isAnswerLocked = false
         showScore = false
+        wrongAnswers.removeAll()
     }
+    // Add review section to scoreView
+    private var reviewSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            if !wrongAnswers.isEmpty {
+                Text("Review Incorrect Answers")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                
+                ForEach(wrongAnswers, id: \.questionId) { wrong in
+                    let question = questions.first { $0.id == wrong.questionId }!
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(question.question)
+                            .font(.subheadline)
+                            .foregroundColor(.white)
+                        
+                        Text("Your answer: \(question.options[wrong.selectedAnswer])")
+                            .foregroundColor(.red.opacity(0.8))
+                        
+                        Text("Correct answer: \(question.options[wrong.correctAnswer])")
+                            .foregroundColor(.green)
+                    }
+                    .padding()
+                    .background(Color.white.opacity(0.1))
+                    .cornerRadius(8)
+                }
+            }
+        }
+        .padding(.horizontal)
+    }
+    
 }
 

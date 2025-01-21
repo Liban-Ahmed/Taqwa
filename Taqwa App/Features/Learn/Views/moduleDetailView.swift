@@ -39,7 +39,7 @@ struct ModuleDetailView: View {
                         VStack(spacing: 16) {
                             ForEach(module.lessons) { lesson in
                                 NavigationLink {
-                                    LessonView(lesson: lesson)
+                                    LessonView(lesson: lesson, module: module)
                                 } label: {
                                     LessonCard(lesson: lesson)
                                 }
