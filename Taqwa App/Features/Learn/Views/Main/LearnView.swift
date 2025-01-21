@@ -41,17 +41,14 @@ struct LearnView: View {
                 // Custom Back Button
                 ToolbarItem(placement: .topBarLeading) {
                     backButton
+                    NavigationLink {
+                                        QuizAnalyticsView()
+                                            .navigationTitle("Learning Analytics")
+                                    } label: {
+                                        Image(systemName: "chart.bar.fill")
+                                            .foregroundColor(.white)
+                                    }
                 }
-                // (Optional) Profile or Achievements Button
-                /*
-                ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink(destination: ProfileView()) {
-                        Image(systemName: "person.crop.circle")
-                            .font(.system(size: 20))
-                            .foregroundColor(.white)
-                    }
-                }
-                */
             }
         }
         .onAppear {

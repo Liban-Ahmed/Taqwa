@@ -154,88 +154,103 @@ struct QuizView: View {
     }
     
     private var scoreView: some View {
-        VStack(spacing: 32) {
-            Spacer()
-            
-            // Score icon
-            ZStack {
-                Circle()
-                    .fill(Color.green.opacity(0.15))
-                    .frame(width: 120, height: 120)
-                
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(.green)
-            }
-            
-            // Score text
-            VStack(spacing: 16) {
-                Text("Quiz Complete!")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                
-                Text("\(score) out of \(questions.count) correct")
-                    .font(.title2)
-                    .foregroundColor(.white.opacity(0.8))
-                
-                // Percentage and message
-                VStack(spacing: 8) {
-                    Text("\(Int((Double(score) / Double(questions.count)) * 100))%")
-                        .font(.system(size: 36, weight: .bold))
+        ScrollView {
+            VStack(spacing: 32) {
+                // Existing score summary
+                VStack(spacing: 16) {
+                    Text("Quiz Complete!")
+                        .font(.title)
+                        .fontWeight(.bold)
                         .foregroundColor(.white)
                     
-                    Text(scoreMessage)
-                        .font(.system(size: 16))
+                    Text("\(score) out of \(questions.count) correct")
+                        .font(.title2)
                         .foregroundColor(.white.opacity(0.8))
-                }
-                .padding(.top, 8)
-            }
-            
-            Spacer()
-            
-            // Action buttons
-            VStack(spacing: 16) {
-                Button {
-                    // Retry quiz
-                    withAnimation {
-                        resetQuiz()
+                    
+                    // Percentage and message
+                    VStack(spacing: 8) {
+                        Text("\(Int((Double(score) / Double(questions.count)) * 100))%")
+                            .font(.system(size: 36, weight: .bold))
+                            .foregroundColor(.white)
+                        
+                        Text(scoreMessage)
+                            .font(.system(size: 16))
+                            .foregroundColor(.white.opacity(0.8))
                     }
-                } label: {
-                    Text("Try Again")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.white.opacity(0.2))
-                        )
+                }
+                .padding(.top, 32)
+                
+                // Review Section for wrong answers
+                if !wrongAnswers.isEmpty {
+                    VStack(alignment: .leading, spacing: 20) {
+                        Text("Review Incorrect Answers")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                        
+                        ForEach(wrongAnswers, id: \.questionId) { wrong in
+                            if let question = questions.first(where: { $0.id == wrong.questionId }) {
+                                VStack(alignment: .leading, spacing: 12) {
+                                    Text(question.question)
+                                        .font(.system(size: 16, weight: .medium))
+                                        .foregroundColor(.white)
+                                    
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        HStack {
+                                            Image(systemName: "xmark.circle.fill")
+                                                .foregroundColor(.red)
+                                            Text("Your answer: \(question.options[wrong.selectedAnswer])")
+                                                .foregroundColor(.white.opacity(0.8))
+                                        }
+                                        
+                                        HStack {
+                                            Image(systemName: "checkmark.circle.fill")
+                                                .foregroundColor(.green)
+                                            Text("Correct: \(question.options[wrong.correctAnswer])")
+                                                .foregroundColor(.white.opacity(0.8))
+                                        }
+                                    }
+                                }
+                                .padding()
+                                .background(Color.white.opacity(0.1))
+                                .cornerRadius(12)
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
                 }
                 
-                Button {
-                    dismiss()
-                } label: {
-                    Text("Back to Lesson")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(
-                            LinearGradient(
-                                colors: [
-                                    Color(red: 0.95, green: 0.75, blue: 0.45),
-                                    Color(red: 1.00, green: 0.88, blue: 0.60)
-                                ],
-                                startPoint: .leading,
-                                endPoint: .trailing
+                // Action Buttons
+                VStack(spacing: 16) {
+                    Button(action: { resetQuiz() }) {
+                        Text("Try Again")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue.opacity(0.3))
+                            .cornerRadius(12)
+                    }
+                    
+                    Button(action: { dismiss() }) {
+                        Text("Back to Lesson")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(
+                                LinearGradient(
+                                    colors: [.blue, .purple],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
                             )
-                        )
-                        .cornerRadius(12)
+                            .cornerRadius(12)
+                    }
                 }
+                .padding(.horizontal)
+                .padding(.top, 16)
+                .padding(.bottom, 32)
             }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 32)
         }
     }
     
