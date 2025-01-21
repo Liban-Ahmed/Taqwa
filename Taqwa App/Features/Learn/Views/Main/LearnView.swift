@@ -5,12 +5,14 @@
 //  Created by Liban Ahmed on 1/4/25.
 //
 import SwiftUI
-
+import CloudKit
+import Combine
 struct LearnView: View {
     // Example progress manager for demonstration (replace with real logic if needed)
     @StateObject private var progressManager = FakeProgressManager()
     @StateObject private var viewModel = LearnViewModel()
     @Environment(\.dismiss) private var dismiss
+    
     
     var body: some View {
         NavigationStack {
@@ -42,12 +44,13 @@ struct LearnView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     backButton
                     NavigationLink {
-                                        QuizAnalyticsView()
-                                            .navigationTitle("Learning Analytics")
-                                    } label: {
-                                        Image(systemName: "chart.bar.fill")
-                                            .foregroundColor(.white)
-                                    }
+                        QuizAnalyticsView()
+                            .navigationTitle("Learning Analytics")
+                    } label: {
+                        Image(systemName: "chart.bar.fill")
+                            .foregroundColor(.white)
+                    }
+                    SyncStatusView(status: viewModel.syncStatus)
                 }
             }
         }
@@ -79,7 +82,7 @@ struct LearnView: View {
                         .font(.system(size: 16))
                         .foregroundColor(.white.opacity(0.9))
                 }
-                .padding(.top, 20)
+                    .padding(.top, 20)
             )
         }
         .frame(maxWidth: .infinity, minHeight: 120)
@@ -129,10 +132,10 @@ struct LearnView: View {
             
             ProgressView(value: Double(progressManager.completedModules),
                          total: Double(progressManager.totalModules))
-                .progressViewStyle(LinearProgressViewStyle(tint: .white))
-                .frame(height: 6)
-                .clipShape(Capsule())
-                .padding(.horizontal, 20)
+            .progressViewStyle(LinearProgressViewStyle(tint: .white))
+            .frame(height: 6)
+            .clipShape(Capsule())
+            .padding(.horizontal, 20)
         }
         .background(.ultraThinMaterial.opacity(0.4))
         .cornerRadius(16)
@@ -267,5 +270,34 @@ struct LessonProgressView: View {
                 .font(.caption2)
                 .foregroundColor(.blue)
         }
+    }
+}
+
+struct SyncStatusView: View {
+    let status: LearnViewModel.SyncStatus
+    
+    var body: some View {
+        HStack {
+            switch status {
+            case .upToDate:
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.green)
+                Text("Synced")
+            case .syncing:
+                ProgressView()
+                    .scaleEffect(0.8)
+                Text("Syncing...")
+            case .offline:
+                Image(systemName: "cloud.slash.fill")
+                    .foregroundColor(.orange)
+                Text("Offline")
+            case .error(let message):
+                Image(systemName: "exclamationmark.circle.fill")
+                    .foregroundColor(.red)
+                Text(message)
+            }
+        }
+        .font(.caption)
+        .foregroundColor(.secondary)
     }
 }

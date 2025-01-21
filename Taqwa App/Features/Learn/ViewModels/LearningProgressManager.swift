@@ -8,57 +8,61 @@ import SwiftUI
 class LearningProgressManager: ObservableObject {
     static let shared = LearningProgressManager()
     private let defaults = UserDefaults.standard
+    private let cloudSync = CloudSyncManager.shared
+    private var syncTask: Task<Void, Error>?
+    private var offlineQueue: [() -> Void] = []
     
     // Keys for UserDefaults
-    // Keys for UserDefaults
-        private enum Keys {
-            static let completedLessons = "completedLessons"
-            static let quizScores = "quizScores"
-            static let totalPoints = "totalPoints"
-            static let streak = "streak"
-            static let lastAccessedPositions = "lastAccessedPositions"
-            static let lastStudyDate = "lastStudyDate"
-            static let quizProgress = "quizProgress"
-            static let quizHistory = "quizHistory"
-            static let totalAttempts = "totalAttempts"
-            static let averageScore = "averageScore"
-        }
+    private enum Keys {
+        static let completedLessons = "completedLessons"
+        static let quizScores = "quizScores"
+        static let totalPoints = "totalPoints"
+        static let streak = "streak"
+        static let lastAccessedPositions = "lastAccessedPositions"
+        static let lastStudyDate = "lastStudyDate"
+        static let quizProgress = "quizProgress"
+        static let quizHistory = "quizHistory"
+        static let totalAttempts = "totalAttempts"
+        static let averageScore = "averageScore"
+        static let offlineCache = "offlineCache"
+        static let lastSyncTimestamp = "lastSyncTimestamp"
+    }
     
     
     @Published var totalPoints: Int {
-            didSet {
-                defaults.set(totalPoints, forKey: Keys.totalPoints)
-            }
+        didSet {
+            defaults.set(totalPoints, forKey: Keys.totalPoints)
         }
+    }
+    
+    @Published var streak: Int {
+        didSet {
+            defaults.set(streak, forKey: Keys.streak)
+        }
+    }
+    
+    @Published private(set) var totalQuizAttempts: Int {
+        didSet {
+            defaults.set(totalQuizAttempts, forKey: Keys.totalAttempts)
+        }
+    }
+    
+    @Published private(set) var averageScore: Double {
+        didSet {
+            defaults.set(averageScore, forKey: Keys.averageScore)
+        }
+    }
+    
+    private init() {
+        // Initialize all stored properties first
+        self.totalPoints = defaults.integer(forKey: Keys.totalPoints)
+        self.streak = defaults.integer(forKey: Keys.streak)
+        self.totalQuizAttempts = defaults.integer(forKey: Keys.totalAttempts)
+        self.averageScore = defaults.double(forKey: Keys.averageScore)
         
-        @Published var streak: Int {
-            didSet {
-                defaults.set(streak, forKey: Keys.streak)
-            }
-        }
-        
-        @Published private(set) var totalQuizAttempts: Int {
-            didSet {
-                defaults.set(totalQuizAttempts, forKey: Keys.totalAttempts)
-            }
-        }
-        
-        @Published private(set) var averageScore: Double {
-            didSet {
-                defaults.set(averageScore, forKey: Keys.averageScore)
-            }
-        }
-        
-        private init() {
-            // Initialize all stored properties first
-            self.totalPoints = defaults.integer(forKey: Keys.totalPoints)
-            self.streak = defaults.integer(forKey: Keys.streak)
-            self.totalQuizAttempts = defaults.integer(forKey: Keys.totalAttempts)
-            self.averageScore = defaults.double(forKey: Keys.averageScore)
-            
-            // Then call updateStreak after all properties are initialized
-            updateStreak()
-        }
+        // Then call updateStreak after all properties are initialized
+        updateStreak()
+    }
     func saveQuizProgress(moduleId: Int, lessonId: Int, score: Int, wrongAnswers: [QuizProgress.WrongAnswer]) {
         // Create new progress entry
         let progress = QuizProgress(
@@ -181,5 +185,110 @@ class LearningProgressManager: ObservableObject {
         }
         
         defaults.set(today, forKey: Keys.lastStudyDate)
+    }
+    
+    func saveAndSync(completion: @escaping (Error?) -> Void) {
+        // Save locally first
+        let progressData = self.prepareProgressData()
+        self.saveToOfflineCache(progressData)
+        
+        // Then attempt to sync with cloud
+        syncTask = Task {
+            do {
+                try await cloudSync.syncProgress(progressData)
+                await MainActor.run {
+                    self.clearOfflineCache()
+                    completion(nil)
+                }
+            } catch {
+                await MainActor.run {
+                    self.addToOfflineQueue()
+                    completion(error)
+                }
+            }
+        }
+    }
+    
+    private func prepareProgressData() -> [String: Any] {
+        return [
+            "totalPoints": totalPoints,
+            "streak": streak,
+            "totalQuizAttempts": totalQuizAttempts,
+            "averageScore": averageScore,
+            "completedLessons": Array(getCompletedLessons()),
+            "quizScores": getQuizScores(),
+            "lastAccessed": getLastAccessedPositions(),
+            "timestamp": Date().timeIntervalSince1970
+        ]
+    }
+    
+    private func saveToOfflineCache(_ data: [String: Any]) {
+        defaults.set(try? JSONSerialization.data(withJSONObject: data), 
+                    forKey: Keys.offlineCache)
+    }
+    
+    private func restoreFromOfflineCache() {
+        guard let data = defaults.data(forKey: Keys.offlineCache),
+              let cached = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return
+        }
+        
+        self.totalPoints = cached["totalPoints"] as? Int ?? 0
+        self.streak = cached["streak"] as? Int ?? 0
+        self.totalQuizAttempts = cached["totalQuizAttempts"] as? Int ?? 0
+        self.averageScore = cached["averageScore"] as? Double ?? 0.0
+    }
+    
+    func syncWithCloud() {
+        Task {
+            do {
+                let cloudProgress = try await cloudSync.fetchProgress()
+                await MainActor.run {
+                    self.mergeProgress(cloudProgress)
+                }
+            } catch {
+                print("Cloud sync failed: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    private func mergeProgress(_ cloudProgress: [String: Any]) {
+        let localTimestamp = defaults.double(forKey: Keys.lastSyncTimestamp)
+        let cloudTimestamp = cloudProgress["timestamp"] as? Double ?? 0
+        
+        // Use the most recent data
+        if cloudTimestamp > localTimestamp {
+            self.totalPoints = cloudProgress["totalPoints"] as? Int ?? self.totalPoints
+            self.streak = cloudProgress["streak"] as? Int ?? self.streak
+            self.totalQuizAttempts = cloudProgress["totalQuizAttempts"] as? Int ?? self.totalQuizAttempts
+            self.averageScore = cloudProgress["averageScore"] as? Double ?? self.averageScore
+            
+            defaults.set(cloudTimestamp, forKey: Keys.lastSyncTimestamp)
+        }
+    }
+    
+    private func addToOfflineQueue() {
+        offlineQueue.append { [weak self] in
+            self?.syncWithCloud()
+        }
+    }
+    
+    private func processOfflineQueue() {
+        guard !offlineQueue.isEmpty else { return }
+        
+        let operations = offlineQueue
+        offlineQueue.removeAll()
+        
+        for operation in operations {
+            operation()
+        }
+    }
+    
+    private func clearOfflineCache() {
+        defaults.removeObject(forKey: Keys.offlineCache)
+    }
+    
+    deinit {
+        syncTask?.cancel()
     }
 }

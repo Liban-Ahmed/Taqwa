@@ -114,11 +114,11 @@ struct ModuleDetailView: View {
             
             // Optional: If you want to add module-level progress, uncomment below:
             /*
-            ProgressView(value: moduleProgress, total: 1.0)
-                .progressViewStyle(LinearProgressViewStyle(tint: .white))
-                .frame(width: 150, height: 6)
-                .clipShape(Capsule())
-                .padding(.top, 8)
+             ProgressView(value: moduleProgress, total: 1.0)
+             .progressViewStyle(LinearProgressViewStyle(tint: .white))
+             .frame(width: 150, height: 6)
+             .clipShape(Capsule())
+             .padding(.top, 8)
              */
         }
         .padding(.vertical, 24)

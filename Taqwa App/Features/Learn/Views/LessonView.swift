@@ -83,12 +83,12 @@ struct LessonView: View {
         .overlay(
             Group {
                 if showQuiz {
-                                   QuizView(
-                                       moduleId: module.id,
-                                       lessonId: lesson.id,
-                                       questions: lesson.quizQuestions
-                                   )
-                                   .transition(.opacity)
+                    QuizView(
+                        moduleId: module.id,
+                        lessonId: lesson.id,
+                        questions: lesson.quizQuestions
+                    )
+                    .transition(.opacity)
                 }
             }
         )
