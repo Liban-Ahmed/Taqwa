@@ -8,76 +8,71 @@ import SwiftUI
 import CloudKit
 import Combine
 struct LearnView: View {
-    // Example progress manager for demonstration (replace with real logic if needed)
-    @StateObject private var progressManager = FakeProgressManager()
+    @StateObject private var progressManager = LearningProgressManager.shared
     @StateObject private var viewModel = LearnViewModel()
     @Environment(\.dismiss) private var dismiss
-    
     
     var body: some View {
         NavigationStack {
             ZStack {
-                // Background gradient
                 LinearGradient(
-                    gradient: Gradient(colors: [
-                        Color(red: 0.10, green: 0.20, blue: 0.40),
-                        Color(red: 0.60, green: 0.30, blue: 0.70)
-                    ]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
+                                    gradient: Gradient(colors: [
+                                        Color(red: 0.10, green: 0.20, blue: 0.40),
+                                        Color(red: 0.60, green: 0.30, blue: 0.70)
+                                    ]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                                .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
                     headerSection
                     progressSummaryCard
-                    
                     ScrollView(showsIndicators: false) {
                         moduleGrid
                     }
-                    .padding(.top, 8)
                 }
             }
-            .navigationBarBackButtonHidden(true)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                // Custom Back Button
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .navigationBarLeading) {
                     backButton
-                    NavigationLink {
-                        QuizAnalyticsView()
-                            .navigationTitle("Learning Analytics")
-                    } label: {
-                        Image(systemName: "chart.bar.fill")
-                            .foregroundColor(.white)
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    HStack(spacing: 16) {
+                        NavigationLink(destination: QuizAnalyticsView()) {
+                            Image(systemName: "chart.bar.fill")
+                                .foregroundColor(.white)
+                        }
+                        
+                        SyncStatusView(status: viewModel.syncStatus)
+                        
+                        NavigationLink(destination: EnhancedAchievementView()) {
+                            Image(systemName: "trophy.fill")
+                                .foregroundColor(.white)
+                        }
                     }
-                    SyncStatusView(status: viewModel.syncStatus)
-                    NavigationLink {
-                               AchievementView()
-                           } label: {
-                               Image(systemName: "trophy.fill")
-                                   .foregroundColor(.white)
-                           }
                 }
             }
             .overlay(
-                Group {
-                    if let achievement = AchievementManager.shared.recentlyUnlocked {
-                        AchievementNotification(achievement: achievement)
-                            .transition(.move(edge: .top))
-                            .animation(.spring(), value: achievement.id) // Change animation value to id
-                            .onAppear {
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                                    AchievementManager.shared.recentlyUnlocked = nil
+                            Group {
+                                if let achievement = AchievementManager.shared.recentlyUnlocked {
+                                    AchievementNotification(achievement: achievement)
+                                        .transition(.move(edge: .top))
+                                        .animation(.spring(), value: achievement.id) // Change animation value to id
+                                        .onAppear {
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                                AchievementManager.shared.recentlyUnlocked = nil
+                                            }
+                                        }
                                 }
                             }
-                    }
-                }
-            )
+                        )
         }
         .onAppear {
             viewModel.loadModules()
         }
-        
     }
     
     // MARK: - Header

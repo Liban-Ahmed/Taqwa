@@ -17,13 +17,13 @@ public struct Achievement: Identifiable, Codable {
     public var isUnlocked: Bool
     public var unlockedAt: Date?
     
-    public enum AchievementType: String, Codable {
-        case lessonCompletion
-        case quizMastery
-        case streak
-        case totalPoints
-        case perfectQuiz
-    }
+    public enum AchievementType: String, Codable, CaseIterable {
+            case lessonCompletion
+            case quizMastery
+            case streak
+            case totalPoints
+            case perfectQuiz
+        }
     public static func == (lhs: Achievement, rhs: Achievement) -> Bool {
             return lhs.id == rhs.id
         }

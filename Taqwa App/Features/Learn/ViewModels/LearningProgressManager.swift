@@ -39,6 +39,7 @@ class LearningProgressManager: ObservableObject, LearningProgressManagerType {
     }
     
     
+    
     @Published var totalPoints: Int {
         didSet {
             defaults.set(totalPoints, forKey: Keys.totalPoints)
@@ -50,6 +51,10 @@ class LearningProgressManager: ObservableObject, LearningProgressManagerType {
             defaults.set(streak, forKey: Keys.streak)
         }
     }
+    @Published var currentStreak: Int {
+            get { streak }
+            set { streak = newValue }
+        }
     
     @Published private(set) var totalQuizAttempts: Int {
         didSet {
@@ -237,7 +242,7 @@ class LearningProgressManager: ObservableObject, LearningProgressManagerType {
     }
     
     private func saveToOfflineCache(_ data: [String: Any]) {
-        defaults.set(try? JSONSerialization.data(withJSONObject: data), 
+        defaults.set(try? JSONSerialization.data(withJSONObject: data),
                      forKey: Keys.offlineCache)
     }
     
