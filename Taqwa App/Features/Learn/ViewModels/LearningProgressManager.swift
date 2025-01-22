@@ -5,13 +5,23 @@
 //  Created by Liban Ahmed on 1/20/25.
 //
 import SwiftUI
-class LearningProgressManager: ObservableObject {
-    static let shared = LearningProgressManager()
+import Combine
+protocol LearningProgressManagerType: AnyObject {
+    var totalPoints: Int { get set }
+    var streak: Int { get set }
+    var totalQuizAttempts: Int { get }
+    var averageScore: Double { get }
+    func getCompletedLessons() -> Set<String>
+    func addPoints(_ points: Int)
+}
+class LearningProgressManager: ObservableObject, LearningProgressManagerType {
+    
+    static let shared: LearningProgressManager = LearningProgressManager()
     private let defaults = UserDefaults.standard
     private let cloudSync = CloudSyncManager.shared
     private var syncTask: Task<Void, Error>?
     private var offlineQueue: [() -> Void] = []
-    
+    private lazy var achievementManager = AchievementManager.shared
     // Keys for UserDefaults
     private enum Keys {
         static let completedLessons = "completedLessons"
@@ -54,13 +64,15 @@ class LearningProgressManager: ObservableObject {
     }
     
     private init() {
-        // Initialize all stored properties first
+        // Initialize properties
         self.totalPoints = defaults.integer(forKey: Keys.totalPoints)
         self.streak = defaults.integer(forKey: Keys.streak)
         self.totalQuizAttempts = defaults.integer(forKey: Keys.totalAttempts)
         self.averageScore = defaults.double(forKey: Keys.averageScore)
         
-        // Then call updateStreak after all properties are initialized
+        // If needed, set AchievementManager's progressManager after initialization
+        AchievementManager.shared.progressManager = self
+        
         updateStreak()
     }
     func saveQuizProgress(moduleId: Int, lessonId: Int, score: Int, wrongAnswers: [QuizProgress.WrongAnswer]) {
@@ -137,6 +149,7 @@ class LearningProgressManager: ObservableObject {
         completed.insert(key)
         defaults.set(Array(completed), forKey: Keys.completedLessons)
         addPoints(50) // Award points for completion
+        achievementManager.checkAchievements()
     }
     
     func saveQuizScore(moduleId: Int, lessonId: Int, score: Int) {
@@ -154,7 +167,7 @@ class LearningProgressManager: ObservableObject {
         defaults.set(positions, forKey: Keys.lastAccessedPositions)
     }
     
-    private func getCompletedLessons() -> Set<String> {
+    func getCompletedLessons() -> Set<String> {
         let array = defaults.array(forKey: Keys.completedLessons) as? [String] ?? []
         return Set(array)
     }
@@ -167,7 +180,7 @@ class LearningProgressManager: ObservableObject {
         return defaults.dictionary(forKey: Keys.lastAccessedPositions) as? [String: Int] ?? [:]
     }
     
-    private func addPoints(_ points: Int) {
+    func addPoints(_ points: Int) {
         totalPoints += points
     }
     
@@ -185,6 +198,7 @@ class LearningProgressManager: ObservableObject {
         }
         
         defaults.set(today, forKey: Keys.lastStudyDate)
+        achievementManager.checkAchievements()
     }
     
     func saveAndSync(completion: @escaping (Error?) -> Void) {
@@ -224,7 +238,7 @@ class LearningProgressManager: ObservableObject {
     
     private func saveToOfflineCache(_ data: [String: Any]) {
         defaults.set(try? JSONSerialization.data(withJSONObject: data), 
-                    forKey: Keys.offlineCache)
+                     forKey: Keys.offlineCache)
     }
     
     private func restoreFromOfflineCache() {

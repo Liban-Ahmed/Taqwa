@@ -51,12 +51,33 @@ struct LearnView: View {
                             .foregroundColor(.white)
                     }
                     SyncStatusView(status: viewModel.syncStatus)
+                    NavigationLink {
+                               AchievementView()
+                           } label: {
+                               Image(systemName: "trophy.fill")
+                                   .foregroundColor(.white)
+                           }
                 }
             }
+            .overlay(
+                Group {
+                    if let achievement = AchievementManager.shared.recentlyUnlocked {
+                        AchievementNotification(achievement: achievement)
+                            .transition(.move(edge: .top))
+                            .animation(.spring(), value: achievement.id) // Change animation value to id
+                            .onAppear {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                    AchievementManager.shared.recentlyUnlocked = nil
+                                }
+                            }
+                    }
+                }
+            )
         }
         .onAppear {
             viewModel.loadModules()
         }
+        
     }
     
     // MARK: - Header
