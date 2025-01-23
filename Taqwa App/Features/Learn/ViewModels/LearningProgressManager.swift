@@ -51,7 +51,7 @@ class LearningProgressManager: ObservableObject, LearningProgressManagerType {
             defaults.set(streak, forKey: Keys.streak)
         }
     }
-    @Published var currentStreak: Int {
+    var totalModules: Int{
             get { streak }
             set { streak = newValue }
         }

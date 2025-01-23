@@ -8,7 +8,7 @@ import SwiftUI
 import CloudKit
 import Combine
 struct LearnView: View {
-    @StateObject private var progressManager = LearningProgressManager.shared
+    @ObservedObject private var progressManager = LearningProgressManager.shared
     @StateObject private var viewModel = LearnViewModel()
     @Environment(\.dismiss) private var dismiss
     
@@ -127,7 +127,7 @@ struct LearnView: View {
                     HStack {
                         Image(systemName: "flame.fill")
                             .foregroundColor(.orange)
-                        Text("\(progressManager.currentStreak) days")
+                        Text("Current Streak: \($progressManager.currentStreak)")
                             .font(.headline)
                             .foregroundColor(.white)
                     }
