@@ -127,9 +127,10 @@ struct LearnView: View {
                     HStack {
                         Image(systemName: "flame.fill")
                             .foregroundColor(.orange)
-                        Text("Current Streak: \($progressManager.currentStreak)")
+//                        Text("Current Streak: \(progressManager.currentStreak)")
                             .font(.headline)
                             .foregroundColor(.white)
+
                     }
                 }
                 Spacer()
@@ -138,7 +139,7 @@ struct LearnView: View {
                     Text("Modules")
                         .font(.caption)
                         .foregroundColor(.white.opacity(0.7))
-                    Text("\(progressManager.completedModules)/\(progressManager.totalModules)")
+//                    Text("\(progressManager.completedModules)/\(progressManager.totalModules)")
                         .font(.headline)
                         .foregroundColor(.white)
                 }
@@ -146,12 +147,12 @@ struct LearnView: View {
             .padding(.vertical, 12)
             .padding(.horizontal, 20)
             
-            ProgressView(value: Double(progressManager.completedModules),
-                         total: Double(progressManager.totalModules))
-            .progressViewStyle(LinearProgressViewStyle(tint: .white))
-            .frame(height: 6)
-            .clipShape(Capsule())
-            .padding(.horizontal, 20)
+//            ProgressView(value: Double(progressManager.completedModules),
+//                         total: Double(progressManager.totalModules))
+//            .progressViewStyle(LinearProgressViewStyle(tint: .white))
+//            .frame(height: 6)
+//            .clipShape(Capsule())
+//            .padding(.horizontal, 20)
         }
         .background(.ultraThinMaterial.opacity(0.4))
         .cornerRadius(16)
