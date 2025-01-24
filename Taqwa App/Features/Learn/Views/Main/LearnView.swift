@@ -16,14 +16,14 @@ struct LearnView: View {
         NavigationStack {
             ZStack {
                 LinearGradient(
-                                    gradient: Gradient(colors: [
-                                        Color(red: 0.10, green: 0.20, blue: 0.40),
-                                        Color(red: 0.60, green: 0.30, blue: 0.70)
-                                    ]),
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                                .ignoresSafeArea()
+                    gradient: Gradient(colors: [
+                        Color(red: 0.10, green: 0.20, blue: 0.40),
+                        Color(red: 0.60, green: 0.30, blue: 0.70)
+                    ]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
                     headerSection
@@ -35,10 +35,6 @@ struct LearnView: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    backButton
-                }
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 16) {
                         NavigationLink(destination: QuizAnalyticsView()) {
@@ -56,19 +52,19 @@ struct LearnView: View {
                 }
             }
             .overlay(
-                            Group {
-                                if let achievement = AchievementManager.shared.recentlyUnlocked {
-                                    AchievementNotification(achievement: achievement)
-                                        .transition(.move(edge: .top))
-                                        .animation(.spring(), value: achievement.id) // Change animation value to id
-                                        .onAppear {
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                                                AchievementManager.shared.recentlyUnlocked = nil
-                                            }
-                                        }
+                Group {
+                    if let achievement = AchievementManager.shared.recentlyUnlocked {
+                        AchievementNotification(achievement: achievement)
+                            .transition(.move(edge: .top))
+                            .animation(.spring(), value: achievement.id) // Change animation value to id
+                            .onAppear {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                    AchievementManager.shared.recentlyUnlocked = nil
                                 }
                             }
-                        )
+                    }
+                }
+            )
         }
         .onAppear {
             viewModel.loadModules()
@@ -127,10 +123,10 @@ struct LearnView: View {
                     HStack {
                         Image(systemName: "flame.fill")
                             .foregroundColor(.orange)
-//                        Text("Current Streak: \(progressManager.currentStreak)")
+                        //                        Text("Current Streak: \(progressManager.currentStreak)")
                             .font(.headline)
                             .foregroundColor(.white)
-
+                        
                     }
                 }
                 Spacer()
@@ -139,7 +135,7 @@ struct LearnView: View {
                     Text("Modules")
                         .font(.caption)
                         .foregroundColor(.white.opacity(0.7))
-//                    Text("\(progressManager.completedModules)/\(progressManager.totalModules)")
+                    //                    Text("\(progressManager.completedModules)/\(progressManager.totalModules)")
                         .font(.headline)
                         .foregroundColor(.white)
                 }
@@ -147,12 +143,12 @@ struct LearnView: View {
             .padding(.vertical, 12)
             .padding(.horizontal, 20)
             
-//            ProgressView(value: Double(progressManager.completedModules),
-//                         total: Double(progressManager.totalModules))
-//            .progressViewStyle(LinearProgressViewStyle(tint: .white))
-//            .frame(height: 6)
-//            .clipShape(Capsule())
-//            .padding(.horizontal, 20)
+            //            ProgressView(value: Double(progressManager.completedModules),
+            //                         total: Double(progressManager.totalModules))
+            //            .progressViewStyle(LinearProgressViewStyle(tint: .white))
+            //            .frame(height: 6)
+            //            .clipShape(Capsule())
+            //            .padding(.horizontal, 20)
         }
         .background(.ultraThinMaterial.opacity(0.4))
         .cornerRadius(16)
@@ -184,19 +180,6 @@ struct LearnView: View {
             }
         }
         .padding(16)
-    }
-    
-    // MARK: - Custom Back Button
-    private var backButton: some View {
-        Button(action: { dismiss() }) {
-            HStack(spacing: 4) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 16, weight: .semibold))
-                Text("Back")
-                    .font(.system(size: 16, weight: .semibold))
-            }
-            .foregroundColor(.white)
-        }
     }
 }
 

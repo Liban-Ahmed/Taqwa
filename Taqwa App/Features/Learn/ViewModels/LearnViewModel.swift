@@ -12,27 +12,27 @@ class LearnViewModel: ObservableObject {
     private let progressManager = LearningProgressManager.shared
     
     enum SyncStatus {
-           case upToDate
-           case syncing
-           case offline
-           case error(String)
-       }
+        case upToDate
+        case syncing
+        case offline
+        case error(String)
+    }
     func loadModules() {
         modules = LearningDataManager.shared.loadModules()
     }
     private func syncProgress() {
-           syncStatus = .syncing
-           
-           progressManager.saveAndSync { [weak self] error in
-               DispatchQueue.main.async {
-                   if let error = error {
-                       self?.syncStatus = .error(error.localizedDescription)
-                   } else {
-                       self?.syncStatus = .upToDate
-                   }
-               }
-           }
-       }
+        syncStatus = .syncing
+        
+        progressManager.saveAndSync { [weak self] error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    self?.syncStatus = .error(error.localizedDescription)
+                } else {
+                    self?.syncStatus = .upToDate
+                }
+            }
+        }
+    }
     
     func getCompletedLessonsCount(for module: Module) -> Int {
         let completed = UserDefaults.standard.array(forKey: "completedLessons") as? [String] ?? []

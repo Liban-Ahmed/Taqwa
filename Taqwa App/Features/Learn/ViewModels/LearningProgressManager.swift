@@ -52,9 +52,9 @@ class LearningProgressManager: ObservableObject, LearningProgressManagerType {
         }
     }
     var totalModules: Int{
-            get { streak }
-            set { streak = newValue }
-        }
+        get { streak }
+        set { streak = newValue }
+    }
     
     @Published private(set) var totalQuizAttempts: Int {
         didSet {

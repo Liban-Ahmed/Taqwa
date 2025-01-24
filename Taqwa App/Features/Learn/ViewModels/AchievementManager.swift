@@ -63,8 +63,8 @@ public class AchievementManager: ObservableObject {
     ]
     
     private init() {
-            loadAchievements()
-        }
+        loadAchievements()
+    }
     
     private func loadAchievements() {
         if let data = defaults.data(forKey: Keys.unlockedAchievements),
