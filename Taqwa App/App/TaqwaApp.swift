@@ -13,7 +13,7 @@ struct Taqwa_AppApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     init() {
         // Add this line to set notification delegate
-        UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
+        NotificationService.shared.setupDailyNotificationRefresh()
     }
     
     var body: some Scene {
