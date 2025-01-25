@@ -88,12 +88,16 @@ class PrayerTimesViewModel: ObservableObject {
         locationManager.startUpdatingLocation { [weak self] location in
             guard let self = self else { return }
             
-            let latitude = location.coordinate.latitude
-            let longitude = location.coordinate.longitude
+            let prayerTimesForDay = self.prayerCalculationService.getPrayerTimes(
+                location: (location.coordinate.latitude, location.coordinate.longitude),
+                date: date
+            )
             
-            // Fetch prayer times
-            let prayerTimesForDay = self.prayerCalculationService.getPrayerTimes(location: (latitude, longitude), date: date)
-            
+            // Schedule notifications with the calculated prayer times
+            NotificationService.shared.scheduleNotifications(
+                        with: prayerTimesForDay.times,
+                        for: date
+                    )
             // Update current and next prayer
             self.scheduleTimer(for: prayerTimesForDay.times, location: location)
             
