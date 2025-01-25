@@ -19,7 +19,10 @@
 				<string>audio</string>
 			</array>
 		</dict>
+		<dict/>
 	</array>
+	<key>NSUserNotificationUsageDescription</key>
+	<string>We need permission to send you prayer time notifications</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

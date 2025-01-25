@@ -4,31 +4,89 @@
 //
 //  Created by Liban Ahmed on 12/30/24.
 //
+import Foundation
 import UserNotifications
+import UIKit
+import CoreLocation
 
 class NotificationService {
     static let shared = NotificationService()
-       private let prayerCalculationService = PrayerCalculationService()
-       private let locationManager = LocationManager()
+    private let prayerCalculationService = PrayerCalculationService()
+    private let locationManager = LocationManager()
+    private let notificationManager = NotificationPermissionManager.shared
+    
+    // Store current prayer times and selected date
+    private var currentPrayerTimes: [PrayerTime] = []
+    private var selectedDate: Date = Date()
     
     func scheduleNotifications(with prayerTimes: [PrayerTime], for date: Date) {
-        // First check if we have notification permissions
-        UNUserNotificationCenter.current().getNotificationSettings { settings in
-            guard settings.authorizationStatus == .authorized else {
-                print("⚠️ Notifications not authorized")
-                return
-            }
-            
-            // Clear existing notifications
-            UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
-            
-            // Schedule notifications for each prayer time
-            for prayer in prayerTimes {
-                self.scheduleNotification(for: prayer, on: date)
+        self.currentPrayerTimes = prayerTimes
+        self.selectedDate = date
+        
+        notificationManager.checkPermissionStatus { status in
+            switch status {
+            case .notDetermined:
+                self.requestPermissions()
+            case .denied:
+                DispatchQueue.main.async {
+                    self.showPermissionAlert()
+                }
+            case .authorized:
+                self.scheduleAuthorizedNotifications(prayerTimes: prayerTimes, date: date)
+            default:
+                break
             }
         }
     }
     
+    func scheduleNotificationsForNextDay() {
+        let dates = [Date(), Calendar.current.date(byAdding: .day, value: 1, to: Date())!]
+        
+        if let location = locationManager.lastKnownLocation {
+            for date in dates {
+                let prayerTimes = prayerCalculationService.getPrayerTimes(
+                    location: (location.coordinate.latitude, location.coordinate.longitude),
+                    date: date
+                )
+                scheduleAuthorizedNotifications(prayerTimes: prayerTimes.times, date: date)
+            }
+        } else {
+            locationManager.startUpdatingLocation { [weak self] location in
+                guard let self = self else { return }
+                for date in dates {
+                    let prayerTimes = self.prayerCalculationService.getPrayerTimes(
+                        location: (location.coordinate.latitude, location.coordinate.longitude),
+                        date: date
+                    )
+                    self.scheduleAuthorizedNotifications(prayerTimes: prayerTimes.times, date: date)
+                }
+            }
+        }
+    }
+    
+    private func requestPermissions() {
+        notificationManager.requestPermissions { [weak self] granted in
+            guard let self = self else { return }
+            if granted {
+                self.scheduleAuthorizedNotifications(
+                    prayerTimes: self.currentPrayerTimes,
+                    date: self.selectedDate
+                )
+            } else {
+                DispatchQueue.main.async {
+                    self.showPermissionAlert()
+                }
+            }
+        }
+    }
+    
+    private func scheduleAuthorizedNotifications(prayerTimes: [PrayerTime], date: Date) {
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        
+        for prayer in prayerTimes {
+            scheduleNotification(for: prayer, on: date)
+        }
+    }
     
     private func scheduleNotification(for prayer: PrayerTime, on date: Date) {
         let content = UNMutableNotificationContent()
@@ -36,7 +94,6 @@ class NotificationService {
         content.body = "It's time for \(prayer.name)"
         content.interruptionLevel = .timeSensitive
         
-        // Use the prayer's notification option directly
         switch prayer.notificationOption {
         case .silent: return
         case .standard:
@@ -46,12 +103,11 @@ class NotificationService {
                 content.sound = UNNotificationSound(named: UNNotificationSoundName(soundURL.lastPathComponent))
                 content.userInfo["customSoundName"] = "azan2.mp3"
             } else {
-                print("⚠️ Adhan sound file not found")
+                print("⚠️ Prayer call sound file not found")
                 content.sound = .default
             }
         }
         
-        // Create daily repeating trigger
         var components = Calendar.current.dateComponents([.hour, .minute], from: prayer.time)
         components.second = 0
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
@@ -67,46 +123,28 @@ class NotificationService {
             }
         }
     }
-    func scheduleNotificationsForNextDay() {
-            // First check if we have notification permissions
-            UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
-                guard let self = self else { return }
-                
-                guard settings.authorizationStatus == .authorized else {
-                    print("⚠️ Notifications not authorized")
-                    return
-                }
-                
-                // Get today and tomorrow's dates
-                let dates = [Date(), Calendar.current.date(byAdding: .day, value: 1, to: Date())!]
-                
-                // Get prayer times for both days if location is available
-                if let location = self.locationManager.lastKnownLocation {
-                    for date in dates {
-                        let prayerTimes = self.prayerCalculationService.getPrayerTimes(
-                            location: (location.coordinate.latitude, location.coordinate.longitude),
-                            date: date
-                        )
-                        self.scheduleNotifications(with: prayerTimes.times, for: date)
-                    }
-                } else {
-                    // Request location update
-                    self.locationManager.startUpdatingLocation { [weak self] location in
-                        guard let self = self else { return }
-                        
-                        for date in dates {
-                            let prayerTimes = self.prayerCalculationService.getPrayerTimes(
-                                location: (location.coordinate.latitude, location.coordinate.longitude),
-                                date: date
-                            )
-                            self.scheduleNotifications(with: prayerTimes.times, for: date)
-                        }
-                    }
-                }
-            }
+    
+    private func showPermissionAlert() {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let rootViewController = windowScene.windows.first?.rootViewController else {
+            return
         }
+        
+        let alert = UIAlertController(
+            title: "Notifications Disabled",
+            message: "Please enable notifications in Settings to receive prayer time alerts",
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "Open Settings", style: .default) { _ in
+            self.notificationManager.openSettingsIfNeeded()
+        })
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        
+        rootViewController.present(alert, animated: true)
+    }
 }
-
 class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
     static let shared = NotificationDelegate()
     
