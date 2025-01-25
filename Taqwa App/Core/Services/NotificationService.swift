@@ -156,7 +156,6 @@ class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         // Check the userInfo for our custom sound name
         if let customSound = notification.request.content.userInfo["customSoundName"] as? String,
            customSound == "azan2.mp3" {
-            // If you have an AVAudioPlayer service for the full-length Adhan, call it here
             AdhanAudioService.shared.playAdhan()
             completionHandler([.banner])
         } else {
