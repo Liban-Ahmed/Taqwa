@@ -37,12 +37,11 @@ struct LearnView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 16) {
+                        SyncStatusView(status: viewModel.syncStatus)
                         NavigationLink(destination: QuizAnalyticsView()) {
                             Image(systemName: "chart.bar.fill")
                                 .foregroundColor(.white)
                         }
-                        
-                        SyncStatusView(status: viewModel.syncStatus)
                         
                         NavigationLink(destination: EnhancedAchievementView()) {
                             Image(systemName: "trophy.fill")
@@ -56,7 +55,7 @@ struct LearnView: View {
                     if let achievement = AchievementManager.shared.recentlyUnlocked {
                         AchievementNotification(achievement: achievement)
                             .transition(.move(edge: .top))
-                            .animation(.spring(), value: achievement.id) // Change animation value to id
+                            .animation(.spring(), value: achievement.id)
                             .onAppear {
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                                     AchievementManager.shared.recentlyUnlocked = nil
