@@ -13,7 +13,7 @@ class PrayerTimesViewModel: ObservableObject {
     @Published var timeRemaining: String = "" // Time remaining until next prayer
     @Published var hijriDate: String = "" // Islamic calendar date
     @Published var progress: Double = 0.0 // Time progress for next prayer
-    
+    @Published var locationError: String?
     private let prayerCalculationService = PrayerCalculationService()
     private let locationManager = LocationManager()
     private let geocoder = CLGeocoder()
@@ -85,37 +85,45 @@ class PrayerTimesViewModel: ObservableObject {
     
     func fetchPrayerTimes(for date: Date) {
         locationManager.requestLocationAuthorization()
-        locationManager.startUpdatingLocation { [weak self] location in
-            guard let self = self else { return }
-            
-            let prayerTimesForDay = self.prayerCalculationService.getPrayerTimes(
-                location: (location.coordinate.latitude, location.coordinate.longitude),
-                date: date
-            )
-            
-            // Schedule notifications with the calculated prayer times
-            NotificationService.shared.scheduleNotifications(
-                        with: prayerTimesForDay.times,
-                        for: date
-                    )
-            // Update current and next prayer
-            self.scheduleTimer(for: prayerTimesForDay.times, location: location)
-            
-            // Perform reverse geocoding
-            self.geocoder.reverseGeocodeLocation(location) { placemarks, error in
-                let locationName = placemarks?.first?.locality ?? "Unknown Location"
+        locationManager.startUpdatingLocation(
+            onUpdate: { [weak self] location in
+                guard let self = self else { return }
+                self.locationError = nil
+                let prayerTimesForDay = self.prayerCalculationService.getPrayerTimes(
+                    location: (location.coordinate.latitude, location.coordinate.longitude),
+                    date: date
+                )
                 
-                // Update the published properties
-                DispatchQueue.main.async {
-                    self.prayerTimes = prayerTimesForDay.times
-                    self.locationName = locationName
-                    self.hijriDate = IslamicDateConverter.convertToHijri(date: date) // Update Hijri date
+                // Schedule notifications with the calculated prayer times
+                NotificationService.shared.scheduleNotifications(
+                    with: prayerTimesForDay.times,
+                    for: date
+                )
+                // Update current and next prayer
+                self.scheduleTimer(for: prayerTimesForDay.times, location: location)
+                
+                // Perform reverse geocoding
+                self.geocoder.reverseGeocodeLocation(location) { placemarks, error in
+                    let locationName = placemarks?.first?.locality ?? "Unknown Location"
                     
-                    // load prayer states from user defaults
-                    self.loadPrayerStates()
+                    // Update the published properties
+                    DispatchQueue.main.async {
+                        self.prayerTimes = prayerTimesForDay.times
+                        self.locationName = locationName
+                        self.hijriDate = IslamicDateConverter.convertToHijri(date: date) // Update Hijri date
+                        
+                        // load prayer states from user defaults
+                        self.loadPrayerStates()
+                    }
+                }
+            },
+            onError: { [weak self] error in
+                DispatchQueue.main.async {
+                    self?.locationError = error.localizedDescription
                 }
             }
-        }
+        )
+        
     }
     
     func updatePrayerTimesForSelectedDate() {

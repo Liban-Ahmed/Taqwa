@@ -51,16 +51,21 @@ class NotificationService {
                 scheduleAuthorizedNotifications(prayerTimes: prayerTimes.times, date: date)
             }
         } else {
-            locationManager.startUpdatingLocation { [weak self] location in
-                guard let self = self else { return }
-                for date in dates {
-                    let prayerTimes = self.prayerCalculationService.getPrayerTimes(
-                        location: (location.coordinate.latitude, location.coordinate.longitude),
-                        date: date
-                    )
-                    self.scheduleAuthorizedNotifications(prayerTimes: prayerTimes.times, date: date)
+            locationManager.startUpdatingLocation(
+                onUpdate: { [weak self] location in
+                    guard let self = self else { return }
+                    for date in dates {
+                        let prayerTimes = self.prayerCalculationService.getPrayerTimes(
+                            location: (location.coordinate.latitude, location.coordinate.longitude),
+                            date: date
+                        )
+                        self.scheduleAuthorizedNotifications(prayerTimes: prayerTimes.times, date: date)
+                    }
+                },
+                onError: { error in
+                    print("⚠️ Location error: \(error.localizedDescription)")
                 }
-            }
+            )
         }
     }
     
