@@ -36,6 +36,8 @@ class LearningProgressManager: ObservableObject, LearningProgressManagerType {
         static let averageScore = "averageScore"
         static let offlineCache = "offlineCache"
         static let lastSyncTimestamp = "lastSyncTimestamp"
+        static let dailyGoal = "dailyGoal"
+        static let studyCalendar = "studyCalendar"
     }
     
     
@@ -309,5 +311,35 @@ class LearningProgressManager: ObservableObject, LearningProgressManagerType {
     
     deinit {
         syncTask?.cancel()
+    }
+    // Add to LearningProgressManager
+    
+
+    var dailyGoal: Int {
+        get { defaults.integer(forKey: Keys.dailyGoal) }
+        set { defaults.set(newValue, forKey: Keys.dailyGoal) }
+    }
+
+    func markDailyCompletion() {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        var dates = Set(getStudyCalendar())
+        dates.insert(today)
+        defaults.set(Array(dates), forKey: Keys.studyCalendar)
+    }
+
+    func getStudyCalendar() -> [Date] {
+        return defaults.array(forKey: Keys.studyCalendar) as? [Date] ?? []
+    }
+    // Add to LearningDataManager
+    func getDueLessons() -> [Lesson] {
+        let progress = LearningProgressManager.shared.getQuizHistory()
+            .filter { $0.completedAt < Date().addingTimeInterval(-3*24*3600) }
+            .sorted { $0.wrongAnswers.count > $1.wrongAnswers.count }
+        
+        return Array(progress.prefix(3)).compactMap { lessonProgress in
+            modules.first { $0.id == lessonProgress.moduleId }?.lessons
+                .first { $0.id == lessonProgress.lessonId }
+        }
     }
 }

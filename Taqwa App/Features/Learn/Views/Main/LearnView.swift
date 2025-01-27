@@ -187,7 +187,6 @@ struct ModuleCard: View {
     let module: Module
     @Environment(\.colorScheme) private var colorScheme
     
-    // Example of lessons completed for this module
     let completedLessons: Int
     let totalLessons: Int
     
@@ -197,15 +196,26 @@ struct ModuleCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Icon
-            Circle()
-                .fill(Color.blue.opacity(0.15))
-                .frame(width: 50, height: 50)
-                .overlay(
-                    Image(systemName: "book.fill")
-                        .font(.system(size: 24))
-                        .foregroundColor(.blue)
-                )
+            ZStack {
+                // Background circle
+                Circle()
+                    .stroke(lineWidth: 3)
+                    .opacity(0.2)
+                    .foregroundColor(.blue)
+                
+                // Progress circle
+                Circle()
+                    .trim(from: 0, to: progress)
+                    .stroke(style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                    .foregroundColor(.blue)
+                    .rotationEffect(.degrees(-90))
+                
+                // Icon overlay
+                Image(systemName: "book.fill")
+                    .font(.system(size: 24))
+                    .foregroundColor(.blue)
+            }
+            .frame(width: 50, height: 50)
             
             // Title & Description
             VStack(alignment: .leading, spacing: 4) {
@@ -220,7 +230,7 @@ struct ModuleCard: View {
                     .lineLimit(2)
             }
             
-            // Lessons Count + progress indicator
+            // Lessons Count + progress text
             HStack {
                 Image(systemName: "book.closed.fill")
                     .font(.system(size: 12))
@@ -229,9 +239,9 @@ struct ModuleCard: View {
                 
                 Spacer()
                 
-                // Circular progress for lessons
-                LessonProgressView(progress: progress)
-                    .frame(width: 24, height: 24)
+                Text("\(Int(progress * 100))%")
+                    .font(.caption2)
+                    .foregroundColor(.blue)
             }
             .foregroundColor(.blue)
         }
@@ -247,7 +257,6 @@ struct ModuleCard: View {
         )
     }
 }
-
 // MARK: - LessonProgressView
 struct LessonProgressView: View {
     let progress: Double
