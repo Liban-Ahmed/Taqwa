@@ -198,7 +198,6 @@ struct CategoryCard: View {
         }
     }
 }
-
 // MARK: - AchievementsListView
 struct AchievementsListView: View {
     let achievements: [Achievement]
@@ -233,7 +232,6 @@ struct EnhancedAchievementRow: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            // Icon
             achievementIcon
             
             // Title & Description
@@ -247,7 +245,6 @@ struct EnhancedAchievementRow: View {
                     .foregroundColor(.white.opacity(0.7))
                     .lineLimit(2)
                 
-                // Unlocked status or a progress indicator
                 if achievement.isUnlocked {
                     unlockedStatus
                 } else {
