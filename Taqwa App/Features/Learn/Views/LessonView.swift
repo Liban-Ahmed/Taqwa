@@ -47,7 +47,6 @@ struct LessonView: View {
             backgroundColor
             
             VStack(spacing: 0) {
-                // Progress bars
                 progressBars
                     .padding(.top, 8)
                 
@@ -69,11 +68,9 @@ struct LessonView: View {
                     }
                 }
                 
-                // Bottom navigation area
                 bottomNavigationArea
             }
             
-            // Touch areas for navigation
             navigationTouchAreas
         }
         .navigationBarHidden(true)
@@ -240,7 +237,6 @@ struct LessonView: View {
         )
         .ignoresSafeArea()
     }
-    
     
     // MARK: - Helper Methods
     
