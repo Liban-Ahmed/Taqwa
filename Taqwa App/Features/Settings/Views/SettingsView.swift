@@ -174,7 +174,7 @@ struct SettingsView: View {
     
     private func settingsGroup<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 20) {
-            // Section Header with improved visibility
+           
             Text(title)
                 .font(.system(size: 18, weight: .bold))
                 .foregroundColor(.white)
